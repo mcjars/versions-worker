@@ -184,7 +184,7 @@ export default function database(env: Env) {
 		},
 
 		async build(build: string) {
-			const int = number.limit(isNaN(parseInt(build)) ? -1 : parseInt(build), 2 ** 31 - 1),
+			const int = isNaN(parseInt(build)) ? -1 : parseInt(build),
 				hashType = build.length === 40 ? 'sha1'
 					: build.length === 56 ? 'sha224'
 					: build.length === 64 ? 'sha256'
@@ -193,7 +193,7 @@ export default function database(env: Env) {
 					: build.length === 32 ? 'md5'
 					: null
 	
-			if (int && !hashType) {
+			if (int && !hashType && int > 0 && int < 2147483647) {
 				return this.prepare.build(await db.select()
 					.from(schema.builds)
 					.where(eq(schema.builds.id, int))
