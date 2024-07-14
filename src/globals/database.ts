@@ -195,18 +195,18 @@ export default function database(env: Env) {
 					: build.length === 32 ? 'md5'
 					: null
 	
-			if (int && !hashType && int > 0 && int < 2147483647) {
-				return this.prepare.build(await db.select()
-					.from(schema.builds)
-					.where(eq(schema.builds.id, int))
-					.get().then((b) => b ?? null)
-				)
-			} else if (hashType) {
+			if (hashType) {
 				return this.prepare.build(await db.select()
 					.from(schema.buildHashes)
 					.where(eq(schema.buildHashes[hashType], build))
 					.innerJoin(schema.builds, eq(schema.builds.id, schema.buildHashes.buildId))
-					.get().then((b) => b?.builds ?? null)
+					.get()
+				)
+			} else if (int && int > 0 && int < 2147483647) {
+				return this.prepare.build(await db.select()
+					.from(schema.builds)
+					.where(eq(schema.builds.id, int))
+					.get()
 				)
 			}
 
