@@ -1,5 +1,5 @@
 import { isNotNull, relations } from "drizzle-orm"
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { foreignKey, index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 
 export const types = [
 	'VANILLA',
@@ -104,11 +104,11 @@ export const minecraftVersions = sqliteTable('minecraftVersions', {
 }))
 
 export const projectVersions = sqliteTable('projectVersions', {
-	id: text('id', { length: 31 }).primaryKey().notNull(),
+	id: text('id', { length: 31 }).notNull(),
 	type: text('type', { enum: types }).notNull()
 }, (projectVersions) => ({
 	typeIdx: index('projectVersions_type_idx').on(projectVersions.type),
-	uniqueIdTypeIdx: uniqueIndex('projectVersions_unique_id_type_idx').on(projectVersions.type, projectVersions.id)
+	pk: primaryKey({ name: 'projectVersions_pk', columns: [projectVersions.type, projectVersions.id] })
 }))
 
 export const minecraftVersionsRelations = relations(minecraftVersions, ({ many }) => ({
@@ -121,15 +121,16 @@ export const projectVersionsRelations = relations(projectVersions, ({ many }) =>
 
 export const builds = sqliteTable('builds', {
 	id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
-	versionId: text('version_id', { length: 31 }).references(() => minecraftVersions.id, { onDelete: 'cascade' }).notNull(),
-	projectVersionId: text('project_version_id', { length: 31 }).references(() => projectVersions.id, { onDelete: 'cascade' }).notNull(),
+	versionId: text('version_id', { length: 31 }).references(() => minecraftVersions.id, { onDelete: 'cascade' }),
+	projectVersionId: text('project_version_id', { length: 31 }),
 
 	type: text('type', { enum: types }).notNull(),
 	rehash: integer('rehash', { mode: 'boolean' }).default(false).notNull(),
+	experimental: integer('experimental', { mode: 'boolean' }).default(false).notNull(),
 
 	buildNumber: integer('build_number').notNull(),
-	jarUrl: text('jar_url', { length: 255 }).notNull(),
-	jarSize: integer('jar_size').notNull(),
+	jarUrl: text('jar_url', { length: 255 }),
+	jarSize: integer('jar_size'),
 	jarLocation: text('jar_location', { length: 51 }),
 	zipUrl: text('zip_url', { length: 255 }),
 	zipSize: integer('zip_size'),
@@ -137,12 +138,17 @@ export const builds = sqliteTable('builds', {
 	metadata: text('metadata', { mode: 'json' }).notNull(),
 	installation: text('installation', { mode: 'json' }).$type<InstallStep[][]>().notNull(),
 	changes: text('changes', { mode: 'json' }).$type<string[]>().notNull(),
-	created: integer('created', { mode: 'timestamp' }).notNull()
+	created: integer('created', { mode: 'timestamp' })
 }, (builds) => ({
 	typeIdx: index('builds_type_idx').on(builds.type),
 	typeVersionIdx: index('builds_type_version_idx').on(builds.type, builds.versionId).where(isNotNull(builds.versionId)),
 	typeProjectVersionIdx: index('builds_type_project_version_idx').on(builds.type, builds.projectVersionId).where(isNotNull(builds.projectVersionId)),
 	versionIdx: index('builds_version_idx').on(builds.versionId).where(isNotNull(builds.versionId)),
+	projectVersionFk: foreignKey({
+		columns: [builds.type, builds.projectVersionId],
+		foreignColumns: [projectVersions.type, projectVersions.id],
+		name: 'builds_project_version_fk'
+	}).onDelete('cascade')
 }))
 
 export const buildsRelations = relations(builds, ({ one, many }) => ({

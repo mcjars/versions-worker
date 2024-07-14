@@ -20,22 +20,23 @@ CREATE TABLE `buildHashes` (
 --> statement-breakpoint
 CREATE TABLE `builds` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`version_id` text(31) NOT NULL,
-	`project_version_id` text(31) NOT NULL,
+	`version_id` text(31),
+	`project_version_id` text(31),
 	`type` text NOT NULL,
 	`rehash` integer DEFAULT false NOT NULL,
+	`experimental` integer DEFAULT false NOT NULL,
 	`build_number` integer NOT NULL,
-	`jar_url` text(255) NOT NULL,
-	`jar_size` integer NOT NULL,
+	`jar_url` text(255),
+	`jar_size` integer,
 	`jar_location` text(51),
 	`zip_url` text(255),
 	`zip_size` integer,
 	`metadata` text NOT NULL,
 	`installation` text NOT NULL,
 	`changes` text NOT NULL,
-	`created` integer NOT NULL,
+	`created` integer,
 	FOREIGN KEY (`version_id`) REFERENCES `minecraftVersions`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`project_version_id`) REFERENCES `projectVersions`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`type`,`project_version_id`) REFERENCES `projectVersions`(`type`,`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `configValues` (
@@ -81,8 +82,9 @@ CREATE TABLE `organizations` (
 );
 --> statement-breakpoint
 CREATE TABLE `projectVersions` (
-	`id` text(31) PRIMARY KEY NOT NULL,
-	`type` text NOT NULL
+	`id` text(31) NOT NULL,
+	`type` text NOT NULL,
+	PRIMARY KEY(`id`, `type`)
 );
 --> statement-breakpoint
 CREATE TABLE `requests` (
@@ -136,7 +138,6 @@ CREATE INDEX `organizationKeys_organization_idx` ON `organizationKeys` (`organiz
 CREATE INDEX `organizationKeys_key_idx` ON `organizationKeys` (`key`);--> statement-breakpoint
 CREATE INDEX `organizations_name_idx` ON `organizations` (`name`);--> statement-breakpoint
 CREATE INDEX `projectVersions_type_idx` ON `projectVersions` (`type`);--> statement-breakpoint
-CREATE UNIQUE INDEX `projectVersions_unique_id_type_idx` ON `projectVersions` (`type`,`id`);--> statement-breakpoint
 CREATE INDEX `requests_organization_idx` ON `requests` (`organization_id`) WHERE "requests"."organization_id" is not null;--> statement-breakpoint
 CREATE INDEX `webhooks_organization_idx` ON `webhooks` (`organization_id`) WHERE "webhooks"."organization_id" is not null;--> statement-breakpoint
 CREATE INDEX `webhooks_enabled_idx` ON `webhooks` (`enabled`);

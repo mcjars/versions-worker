@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "0fc6f528-e68b-49e9-b8e2-1e392754f7d8",
+  "id": "33e74d60-0577-4f25-90e7-465e0d79d227",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "buildConfigs": {
@@ -213,14 +213,14 @@
           "name": "version_id",
           "type": "text(31)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "project_version_id": {
           "name": "project_version_id",
           "type": "text(31)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "type": {
@@ -238,6 +238,14 @@
           "autoincrement": false,
           "default": false
         },
+        "experimental": {
+          "name": "experimental",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "build_number": {
           "name": "build_number",
           "type": "integer",
@@ -249,14 +257,14 @@
           "name": "jar_url",
           "type": "text(255)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "jar_size": {
           "name": "jar_size",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "jar_location": {
@@ -305,7 +313,7 @@
           "name": "created",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         }
       },
@@ -358,14 +366,16 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "builds_project_version_id_projectVersions_id_fk": {
-          "name": "builds_project_version_id_projectVersions_id_fk",
+        "builds_project_version_fk": {
+          "name": "builds_project_version_fk",
           "tableFrom": "builds",
           "tableTo": "projectVersions",
           "columnsFrom": [
+            "type",
             "project_version_id"
           ],
           "columnsTo": [
+            "type",
             "id"
           ],
           "onDelete": "cascade",
@@ -725,7 +735,7 @@
         "id": {
           "name": "id",
           "type": "text(31)",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
@@ -744,18 +754,18 @@
             "type"
           ],
           "isUnique": false
-        },
-        "projectVersions_unique_id_type_idx": {
-          "name": "projectVersions_unique_id_type_idx",
-          "columns": [
-            "type",
-            "id"
-          ],
-          "isUnique": true
         }
       },
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "projectVersions_pk": {
+          "columns": [
+            "id",
+            "type"
+          ],
+          "name": "projectVersions_pk"
+        }
+      },
       "uniqueConstraints": {}
     },
     "requests": {
