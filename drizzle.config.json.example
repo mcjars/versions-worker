@@ -1,0 +1,11 @@
+{
+  "dialect": "sqlite",
+  "driver": "d1-http",
+  "out": "./migrations",
+  "schema": "./src/schema.ts",
+  "dbCredentials": {
+    "accountId": "xxxx",
+    "databaseId": "xxx-x-x-x-xxxxx",
+    "token": "xxxx_xxxxx_xxxx"
+  }
+}
