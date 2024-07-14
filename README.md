@@ -36,3 +36,6 @@ pnpm kit migrate
 # start the dev server on port 6901
 pnpm dev
 ```
+
+> [!NOTE]
+> NOT AN OFFICIAL MINECRAFT SERVICE. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
