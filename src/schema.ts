@@ -142,6 +142,14 @@ export const builds = sqliteTable('builds', {
 	created: integer('created', { mode: 'timestamp' })
 }, (builds) => ({
 	typeIdx: index('builds_type_idx').on(builds.type),
+	experimentalIdx: index('builds_experimental_idx').on(builds.experimental),
+	buildNumberIdx: index('builds_build_number_idx').on(builds.buildNumber),
+	jarUrlIdx: index('builds_jar_url_idx').on(builds.jarUrl).where(isNotNull(builds.jarUrl)),
+	jarSizeIdx: index('builds_jar_size_idx').on(builds.jarSize).where(isNotNull(builds.jarSize)),
+	jarLocationIdx: index('builds_jar_location_idx').on(builds.jarLocation).where(isNotNull(builds.jarLocation)),
+	zipUrlIdx: index('builds_zip_url_idx').on(builds.zipUrl).where(isNotNull(builds.zipUrl)),
+	zipSizeIdx: index('builds_zip_size_idx').on(builds.zipSize).where(isNotNull(builds.zipSize)),
+	createdIdx: index('builds_created_idx').on(builds.created).where(isNotNull(builds.created)),
 	typeVersionIdx: index('builds_type_version_idx').on(builds.type, builds.versionId).where(isNotNull(builds.versionId)),
 	typeProjectVersionIdx: index('builds_type_project_version_idx').on(builds.type, builds.projectVersionId).where(isNotNull(builds.projectVersionId)),
 	versionIdx: index('builds_version_idx').on(builds.versionId).where(isNotNull(builds.versionId)),

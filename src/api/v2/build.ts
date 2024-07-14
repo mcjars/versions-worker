@@ -2,7 +2,7 @@ import { time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { z } from "zod"
 import { ServerType, types } from "../../schema"
-import { and, eq, sql } from "drizzle-orm"
+import { and, eq, or, sql } from "drizzle-orm"
 
 const buildSearch = z.object({
 	id: z.number().int().optional(),
@@ -84,7 +84,7 @@ export default function(router: GlobalRouter) {
 	router.post('/api/v2/build', async({ req }) => {
 		const data = z.union([
 			buildSearch,
-			buildSearch.array()
+			buildSearch.array().min(1).max(10)
 		]).safeParse(await req.json().catch(() => null))
 
 		if (!data.success) return Response.json({ success: false, errors: data.error.errors.map((err) => `${err.path}: ${err.message}`) }, { status: 400 })
