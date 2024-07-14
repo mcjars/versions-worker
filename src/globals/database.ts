@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
 import { number, time } from "@rjweb/utils"
-import { and, countDistinct, eq } from "drizzle-orm"
+import { and, countDistinct, eq, sql } from "drizzle-orm"
 import cache from "./cache"
 
 const compatibility = [
@@ -213,11 +213,15 @@ export default function database(env: Env) {
 	
 		async version(version: string, type: schema.ServerType): Promise<'minecraft' | 'project' | null> {
 			const [ minecraft, project ] = await cache(env).use(`versionLocation::${version}::${type}`, () => Promise.all([
-				db.select({})
+				db.select({
+					_: sql`1`
+				})
 					.from(schema.minecraftVersions)
 					.where(eq(schema.minecraftVersions.id, version))
 					.get(),
-				db.select({})
+				db.select({
+					_: sql`1`
+				})
 					.from(schema.projectVersions)
 					.where(and(
 						eq(schema.projectVersions.type, type),
