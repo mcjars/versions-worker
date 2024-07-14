@@ -11,12 +11,12 @@ export default function(router: GlobalRouter) {
 
 		switch (type) {
 			case "VELOCITY": {
-				const versions = await req.cache.use('builds::velocity', async() => {
+				const versions = await req.cache.use('builds::VELOCITY', async() => {
 					const versions = await req.database.select()
 						.from(
 							req.database.select({
-								builds: count(req.database.schema.builds.id),
-								latest: max(req.database.schema.builds.id),
+								builds: count(req.database.schema.builds.id).as('builds'),
+								latest: max(req.database.schema.builds.id).as('latest'),
 								projectVersionId: req.database.schema.projectVersions.id
 							})
 								.from(req.database.schema.projectVersions)
