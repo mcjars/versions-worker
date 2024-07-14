@@ -1,9 +1,10 @@
 import { Router } from "@tsndr/cloudflare-worker-router"
-import { string } from "@rjweb/utils"
+import { string, time } from "@rjweb/utils"
 import db from "./globals/database"
 import ch from "./globals/cache"
 
 import apiRouter from "./api/routes"
+import { eq } from "drizzle-orm"
 
 const router = new Router<Env, {}, {
 	database: ReturnType<typeof db>
@@ -85,13 +86,7 @@ router.get('/download/leaves/:version/:build/:file', async({ req }) => {
 })
 
 router.any('*', () => {
-	return Response.json({
-		success: false,
-		errors: ['Not found'],
-		routes: '/api/routes'
-	}, {
-		status: 404
-	})
+	return Response.json({ success: false, errors: ['Not found'] }, { status: 404 })
 })
 
 router.cors()
@@ -112,21 +107,41 @@ export default {
 				database = db(env)
 			response.headers.set('X-Request-Id', id)
 
-			ctx.waitUntil(database.insert(database.schema.requests)
-				.values({
-					id,
-					ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
-						?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
-					created: new Date(start),
-					method: request.method,
-					path,
-					status: response.status,
-					time: Date.now() - start,
-					userAgent: request.headers.get('user-agent') ?? 'Unknown',
-					body: await request.json().catch(() => null)
-				})
-				.execute()
-			)
+			ctx.waitUntil(new Promise<void>(async(resolve) => {
+				let organizationId: number | null = null
+				if (request.headers.has('authorization') && request.headers.get('authorization')!.length === 64) {
+					const organization = await ch(env).use(`organization::$${request.headers.get('authorization')}`, () => database.select()
+							.from(database.schema.organizations)
+							.innerJoin(database.schema.organizationKeys, eq(database.schema.organizationKeys.organizationId, database.schema.organizations.id))
+							.where(eq(database.schema.organizationKeys.key, request.headers.get('authorization')!))
+							.get().then((organization) => organization?.organizations ?? null),
+						time(5).m()
+					)
+				
+					if (organization) {
+						organizationId = organization.id
+					}
+				}
+
+				database.insert(database.schema.requests)
+					.values({
+						id,
+						ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
+							?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
+						origin: request.headers.get('origin'),
+						created: new Date(start),
+						method: request.method,
+						path,
+						organizationId,
+						status: response.status,
+						time: Date.now() - start,
+						userAgent: request.headers.get('user-agent') ?? 'Unknown',
+						body: await request.json().catch(() => null)
+					})
+					.execute()
+
+				resolve()
+			}))
 		}
 
 		return response

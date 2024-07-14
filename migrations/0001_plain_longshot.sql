@@ -1,0 +1,1 @@
+ALTER TABLE `requests` ADD `origin` text(255);

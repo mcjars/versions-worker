@@ -1,5 +1,6 @@
 import { GlobalRouter } from "../.."
 
+import organizationRouter from "./organization"
 import buildRouter from "./build"
 import buildsRouter from "./builds"
 import versionRouter from "./version"
@@ -7,6 +8,7 @@ import scriptRouter from "./script"
 import statsRouter from "./stats"
 
 export default function(router: GlobalRouter) {
+	organizationRouter(router)
 	buildRouter(router)
 	buildsRouter(router)
 	versionRouter(router)

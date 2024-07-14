@@ -44,7 +44,7 @@ export const organizations = sqliteTable('organizations', {
 
 	name: text('name', { length: 255 }).notNull(),
 	icon: text('icon', { length: 255 }).notNull(),
-	types: text('types', { mode: 'json' }).$type<ServerType[]>()
+	types: text('types', { mode: 'json' }).notNull().$type<ServerType[]>()
 }, (organizations) => ({
 	nameIdx: index('organizations_name_idx').on(organizations.name)
 }))
@@ -78,6 +78,7 @@ export const requests = sqliteTable('requests', {
 	id: text('id', { length: 12 }).primaryKey().notNull(),
 	organizationId: integer('organization_id').references(() => organizations.id, { onDelete: 'set null' }),
 
+	origin: text('origin', { length: 255 }),
 	method: text('method', { length: 7 }).notNull(),
 	path: text('path', { length: 255 }).notNull(),
 	time: integer('time').notNull(),
@@ -87,7 +88,7 @@ export const requests = sqliteTable('requests', {
 	userAgent: text('user_agent', { length: 255 }).notNull(),
 	created: integer('created', { mode: 'timestamp' }).notNull()
 }, (requests) => ({
-	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
+	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId))
 }))
 
 export const minecraftVersions = sqliteTable('minecraftVersions', {
