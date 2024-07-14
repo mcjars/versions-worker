@@ -197,10 +197,10 @@ export default function database(env: Env) {
 	
 			if (hashType && build.match(/^[a-f0-9]+$/)) {
 				return this.prepare.build(await db.select()
-					.from(schema.buildHashes)
+					.from(schema.builds)
+					.innerJoin(schema.buildHashes, eq(schema.builds.id, schema.buildHashes.buildId))
 					.where(eq(schema.buildHashes[hashType], build))
-					.innerJoin(schema.builds, eq(schema.builds.id, schema.buildHashes.buildId))
-					.get()
+					.get().then((data) => data?.builds)
 				)
 			} else if (int && int > 0 && int < 2147483647) {
 				return this.prepare.build(await db.select()

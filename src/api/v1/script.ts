@@ -17,7 +17,7 @@ export default function(router: GlobalRouter) {
 
 		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
 			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, build.versionId))
+			.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
 			.get()
 		) ?? { java: 21 } : { java: 21 }
 
@@ -80,7 +80,7 @@ export default function(router: GlobalRouter) {
 
 		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
 			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, build.versionId))
+			.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
 			.get()
 		) ?? { java: 21 } : { java: 21 }
 
