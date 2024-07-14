@@ -16,6 +16,7 @@
   "dependencies": {
     "@rjweb/utils": "^1.12.21",
     "@tsndr/cloudflare-worker-router": "^3.2.4",
-    "drizzle-orm": "^0.31.4"
+    "drizzle-orm": "^0.31.4",
+    "zod": "^3.23.8"
   }
 }

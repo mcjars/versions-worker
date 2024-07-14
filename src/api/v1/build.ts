@@ -6,9 +6,13 @@ export default function(router: GlobalRouter) {
 		const build = await req.cache.use(`build::${req.params.build}`, () => req.database.build(req.params.build), time(3).h())
 		if (!build) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
 
+		const [ latest, version ] = await req.database.buildLatest(build)
+
 		return Response.json({
 			success: true,
-			build
+			build,
+			latest,
+			version
 		})
 	})
 }

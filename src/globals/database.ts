@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
 import { number, time } from "@rjweb/utils"
-import { and, countDistinct, eq, sql } from "drizzle-orm"
+import { and, count, countDistinct, desc, eq, like, sql } from "drizzle-orm"
 import cache from "./cache"
 
 const compatibility = [
@@ -197,9 +197,9 @@ export default function database(env: Env) {
 	
 			if (hashType && build.match(/^[a-f0-9]+$/)) {
 				return this.prepare.build(await db.select()
-					.from(schema.builds)
-					.innerJoin(schema.buildHashes, eq(schema.builds.id, schema.buildHashes.buildId))
+					.from(schema.buildHashes)
 					.where(eq(schema.buildHashes[hashType], build))
+					.innerJoin(schema.builds, eq(schema.builds.id, schema.buildHashes.buildId))
 					.get().then((data) => data?.builds)
 				)
 			} else if (int && int > 0 && int < 2147483647) {
@@ -233,6 +233,123 @@ export default function database(env: Env) {
 			]), time(30).m())
 	
 			return minecraft ? 'minecraft' : project ? 'project' : null
+		},
+
+		async buildLatest(build: { type: schema.ServerType, versionId: string | null, projectVersionId: string | null }) {
+			return cache(env).use(`latest::build::${build.type}::${build.type === 'VELOCITY' ? build.projectVersionId : build.versionId}`, async() => {
+				switch (build.type) {
+					case "VELOCITY": {
+						if (!build.projectVersionId) return [null, null]
+
+						const [ dbBuild, dbVersion ] = await Promise.all([
+							db.select()
+								.from(schema.builds)
+								.where(and(
+									eq(schema.builds.type, build.type),
+									eq(schema.builds.projectVersionId, build.projectVersionId)
+								))
+								.orderBy(desc(schema.builds.id))
+								.get(),
+							db.select({
+								builds: count()
+							})
+								.from(schema.builds)
+								.where(eq(schema.builds.projectVersionId, build.projectVersionId))
+								.get()
+						])
+
+						return [
+							this.prepare.build(dbBuild),
+							dbVersion && {
+								id: build.projectVersionId,
+								builds: dbVersion.builds
+							}
+						]
+					}
+
+					case "ARCLIGHT": {
+						if (!build.versionId || !build.projectVersionId) return [null, null]
+
+						const [ dbBuild, dbVersion ] = await Promise.all([
+							db.select()
+								.from(schema.builds)
+								.where(and(
+									eq(schema.builds.type, build.type),
+									eq(schema.builds.versionId, build.versionId),
+									like(schema.builds.projectVersionId, `%${build.projectVersionId.includes('fabric')
+										? '-fabric' : build.projectVersionId.includes('forge')
+											? '-forge' : '-neoforge'}`)
+								))
+								.orderBy(desc(schema.builds.id))
+								.get(),
+							db.select({
+								type: schema.minecraftVersions.type,
+								java: schema.minecraftVersions.java,
+								supported: schema.minecraftVersions.supported,
+								created: schema.minecraftVersions.created,
+								builds: count()
+							})
+								.from(schema.builds)
+								.where(and(
+									eq(schema.builds.type, build.type),
+									eq(schema.builds.versionId, build.versionId)
+								))
+								.innerJoin(schema.minecraftVersions, eq(schema.builds.versionId, schema.minecraftVersions.id))
+								.get()
+						])
+
+						return [
+							this.prepare.build(dbBuild),
+							dbVersion && {
+								id: build.versionId,
+								type: dbVersion.type,
+								java: dbVersion.java,
+								supported: dbVersion.supported,
+								created: dbVersion.created,
+								builds: dbVersion.builds
+							}
+						]
+					}
+
+					default: {
+						if (!build.versionId) return [null, null]
+
+						const [ dbBuild, dbVersion ] = await Promise.all([
+							db.select()
+								.from(schema.builds)
+								.where(and(
+									eq(schema.builds.type, build.type),
+									eq(schema.builds.versionId, build.versionId)
+								))
+								.orderBy(desc(schema.builds.id))
+								.get(),
+							db.select({
+								type: schema.minecraftVersions.type,
+								java: schema.minecraftVersions.java,
+								supported: schema.minecraftVersions.supported,
+								created: schema.minecraftVersions.created,
+								builds: count()
+							})
+								.from(schema.builds)
+								.where(eq(schema.builds.versionId, build.versionId))
+								.innerJoin(schema.minecraftVersions, eq(schema.builds.versionId, schema.minecraftVersions.id))
+								.get()
+						])
+
+						return [
+							this.prepare.build(dbBuild),
+							dbVersion && {
+								id: build.versionId,
+								type: dbVersion.type,
+								java: dbVersion.java,
+								supported: dbVersion.supported,
+								created: dbVersion.created,
+								builds: dbVersion.builds
+							}
+						]
+					}
+				}
+			}, time(5).m())
 		},
 	
 		async types() {
