@@ -30,6 +30,9 @@ pnpm i
 cp wrangler.toml.example wrangler.toml
 cp drizzle.config.json.example drizzle.config.json
 
+# after filling out the configs
+pnpm kit migrate
+
 # start the dev server on port 6901
 pnpm dev
 ```
