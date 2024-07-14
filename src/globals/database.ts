@@ -195,7 +195,7 @@ export default function database(env: Env) {
 					: build.length === 32 ? 'md5'
 					: null
 	
-			if (hashType) {
+			if (hashType && build.match(/^[a-f0-9]+$/)) {
 				return this.prepare.build(await db.select()
 					.from(schema.buildHashes)
 					.where(eq(schema.buildHashes[hashType], build))
