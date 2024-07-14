@@ -184,6 +184,8 @@ export default function database(env: Env) {
 		},
 
 		async build(build: string) {
+			build = build.trim()
+
 			const int = isNaN(parseInt(build)) ? -1 : parseInt(build),
 				hashType = build.length === 40 ? 'sha1'
 					: build.length === 56 ? 'sha224'
