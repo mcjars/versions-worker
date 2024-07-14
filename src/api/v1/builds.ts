@@ -49,6 +49,7 @@ export default function(router: GlobalRouter) {
 					const versions = await req.database.select()
 						.from(
 							req.database.select({
+								java: req.database.schema.minecraftVersions.java,
 								created: req.database.schema.minecraftVersions.created,
 								supported: req.database.schema.minecraftVersions.supported,
 								versionType: req.database.schema.minecraftVersions.type,
@@ -77,6 +78,7 @@ export default function(router: GlobalRouter) {
 						{
 							type: version.x.versionType,
 							supported: version.x.supported,
+							java: version.x.java,
 							created: version.x.created,
 							builds: Number(version.x.builds),
 							latest: req.database.prepare.build(version.builds)
