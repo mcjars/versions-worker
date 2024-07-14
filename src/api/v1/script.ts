@@ -16,9 +16,10 @@ export default function(router: GlobalRouter) {
 		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
 
 		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
-			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
-			.get()
+				.from(req.database.schema.minecraftVersions)
+				.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
+				.get(),
+			time(3).h()
 		) ?? { java: 21 } : { java: 21 }
 
 		const steps: string[] = []
@@ -79,9 +80,10 @@ export default function(router: GlobalRouter) {
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
 
 		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
-			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
-			.get()
+				.from(req.database.schema.minecraftVersions)
+				.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
+				.get(),
+			time(3).h()
 		) ?? { java: 21 } : { java: 21 }
 
 		const steps: string[] = []

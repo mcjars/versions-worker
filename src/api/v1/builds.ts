@@ -6,7 +6,6 @@ import { time } from "@rjweb/utils"
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/builds/:type', async({ req }) => {
 		const type = req.params.type.toUpperCase() as ServerType
-
 		if (!types.includes(type)) return Response.json({ success: false, errors: ['Invalid type'] }, { status: 400 })
 
 		switch (type) {
@@ -94,12 +93,11 @@ export default function(router: GlobalRouter) {
 	})
 
 	router.get('/api/v1/builds/:type/:version', async({ req }) => {
-		const type = req.params.type.toUpperCase() as ServerType,
-			version = req.params.version
-
+		const type = req.params.type.toUpperCase() as ServerType
 		if (!types.includes(type)) return Response.json({ success: false, errors: ['Invalid type'] }, { status: 400 })
 
-		const location = await req.database.version(version, type)
+		const version = req.params.version,
+			location = await req.database.version(version, type)
 		if (!location) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
 		const builds = await req.cache.use(`builds::${type}::${version}`, () => req.database.select()

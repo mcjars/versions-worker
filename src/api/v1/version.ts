@@ -1,15 +1,17 @@
 import { time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
-import { and, count, desc, eq } from "drizzle-orm"
+import { and, count, desc, eq, sql } from "drizzle-orm"
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/version/:version', async({ req }) => {
 		const version = req.params.version
 
-		const versionData = await req.database.select()
-			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, version))
-			.get()
+		const versionData = await req.cache.use(`version::${version}`, () => req.database.select()
+				.from(req.database.schema.minecraftVersions)
+				.where(eq(req.database.schema.minecraftVersions.id, version))
+				.get(),
+			time(3).h()
+		)
 
 		if (!versionData) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
@@ -40,10 +42,12 @@ export default function(router: GlobalRouter) {
 	router.get('/api/v1/version/:version/builds', async({ req }) => {
 		const version = req.params.version
 
-		const versionData = await req.database.select()
-			.from(req.database.schema.minecraftVersions)
-			.where(eq(req.database.schema.minecraftVersions.id, version))
-			.get()
+		const versionData = await req.cache.use(`version::${version}`, () => req.database.select()
+				.from(req.database.schema.minecraftVersions)
+				.where(eq(req.database.schema.minecraftVersions.id, version))
+				.get(),
+			time(3).h()
+		)
 
 		if (!versionData) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
