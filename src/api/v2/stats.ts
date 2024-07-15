@@ -7,15 +7,6 @@ export default function(router: GlobalRouter) {
 	router.get('/api/v2/stats/version/:version', async({ req }) => {
 		const version = req.params.version
 
-		const versionData = await req.cache.use(`version::${version}`, () => req.database.select()
-				.from(req.database.schema.minecraftVersions)
-				.where(eq(req.database.schema.minecraftVersions.id, version))
-				.get(),
-			time(3).h()
-		)
-
-		if (!versionData) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
-
 		const stats = await req.cache.use(`stats::version::${version}`, () => req.database.select({
 				builds: count(),
 				total: {
@@ -31,6 +22,8 @@ export default function(router: GlobalRouter) {
 				.get(),
 			time(30).m()
 		)
+
+		if (!stats?.builds) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
 		return Response.json({
 			success: true,

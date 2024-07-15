@@ -183,36 +183,27 @@ export default function database(env: Env) {
 			}
 		},
 
-		async build(build: string) {
-			build = build.trim()
+		fields: {
+			build: {
+				id: schema.builds.id,
+				type: schema.builds.type,
 
-			const int = isNaN(parseInt(build)) ? -1 : parseInt(build),
-				hashType = build.length === 40 ? 'sha1'
-					: build.length === 56 ? 'sha224'
-					: build.length === 64 ? 'sha256'
-					: build.length === 96 ? 'sha384'
-					: build.length === 128 ? 'sha512'
-					: build.length === 32 ? 'md5'
-					: null
-	
-			if (hashType && build.match(/^[a-f0-9]+$/)) {
-				return this.prepare.build(await db.select()
-					.from(schema.buildHashes)
-					.where(eq(schema.buildHashes[hashType], build))
-					.innerJoin(schema.builds, eq(schema.builds.id, schema.buildHashes.buildId))
-					.limit(1)
-					.get().then((data) => data?.builds)
-				)
-			} else if (int && int > 0 && int < 2147483647) {
-				return this.prepare.build(await db.select()
-					.from(schema.builds)
-					.where(eq(schema.builds.id, int))
-					.limit(1)
-					.get()
-				)
-			}
+				versionId: schema.builds.versionId,
+				projectVersionId: schema.builds.projectVersionId,
+				buildNumber: schema.builds.buildNumber,
+				experimental: schema.builds.experimental,
 
-			return null
+				jarUrl: schema.builds.jarUrl,
+				jarSize: schema.builds.jarSize,
+				jarLocation: schema.builds.jarLocation,
+				zipUrl: schema.builds.zipUrl,
+				zipSize: schema.builds.zipSize,
+
+				installation: schema.builds.installation,
+				changes: schema.builds.changes,
+
+				created: schema.builds.created
+			} as const
 		},
 
 		async versions(type: schema.ServerType) {
@@ -445,7 +436,7 @@ export default function database(env: Env) {
 			const response = await cache(env).use('types::all', async() => {
 				const data = await db.select({
 					type: schema.builds.type,
-					builds: countDistinct(schema.builds.id),
+					builds: count(),
 					versionsMinecraft: countDistinct(schema.builds.versionId),
 					versionsProject: countDistinct(schema.builds.projectVersionId)
 				})

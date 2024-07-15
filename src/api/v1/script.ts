@@ -5,8 +5,46 @@ import { eq } from "drizzle-orm"
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/script/:build/bash', async({ req }) => {
-		const build = await req.cache.use(`build::${req.params.build}`, () => req.database.build(req.params.build), time(3).h()),
-			echo = !(req.query.echo === 'false')
+		const echo = !(req.query.echo === 'false')
+
+		const int = isNaN(parseInt(req.params.build)) ? -1 : parseInt(req.params.build),
+			hashType = req.params.build.length === 40 ? 'sha1'
+				: req.params.build.length === 56 ? 'sha224'
+				: req.params.build.length === 64 ? 'sha256'
+				: req.params.build.length === 96 ? 'sha384'
+				: req.params.build.length === 128 ? 'sha512'
+				: req.params.build.length === 32 ? 'md5'
+				: null
+
+		if ((!hashType || !req.params.build.match(/^[a-f0-9]+$/)) && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
+			'#!/bin/bash',
+			'',
+			'echo "Build not found"',
+			'exit 1'
+		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
+
+		const build = await req.cache.use(`build::${req.params.build}::installation`, async() => {
+			if (hashType) {
+				return req.database.select({
+					java: req.database.schema.minecraftVersions.java,
+					installation: req.database.schema.builds.installation
+				})
+					.from(req.database.schema.buildHashes)
+					.where(eq(req.database.schema.buildHashes[hashType], req.params.build))
+					.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, req.database.schema.buildHashes.buildId))
+					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.get()
+			} else {
+				return req.database.select({
+					java: req.database.schema.minecraftVersions.java,
+					installation: req.database.schema.builds.installation
+				})
+					.from(req.database.schema.builds)
+					.where(eq(req.database.schema.builds.id, int))
+					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.get()
+			}
+		}, time(6).h())
 
 		if (!build) return new Response([
 			'#!/bin/bash',
@@ -14,13 +52,6 @@ export default function(router: GlobalRouter) {
 			'echo "Build not found"',
 			'exit 1'
 		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
-
-		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
-				.from(req.database.schema.minecraftVersions)
-				.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
-				.get(),
-			time(3).h()
-		) ?? { java: 21 } : { java: 21 }
 
 		const steps: string[] = []
 		for (const combined of build.installation) {
@@ -59,32 +90,61 @@ export default function(router: GlobalRouter) {
 
 		return new Response([
 			'#!/bin/bash',
-			`export JAVA_VERSION=${java}`,
+			`export JAVA_VERSION=${build.java}`,
 			'',
 			'echo "Installing Server"',
 			...steps,
 			'',
 			'echo "Installation complete"',
-			`echo "Use Java version: ${java}"`,
+			`echo "Use Java version: ${build.java}"`,
 			'exit 0'
 		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
 	})
 
 	router.get('/api/v1/script/:build/powershell', async({ req }) => {
-		const build = await req.cache.use(`build::${req.params.build}`, () => req.database.build(req.params.build), time(3).h()),
-			echo = !(req.query.echo === 'false')
+		const echo = !(req.query.echo === 'false')
+
+		const int = isNaN(parseInt(req.params.build)) ? -1 : parseInt(req.params.build),
+			hashType = req.params.build.length === 40 ? 'sha1'
+				: req.params.build.length === 56 ? 'sha224'
+				: req.params.build.length === 64 ? 'sha256'
+				: req.params.build.length === 96 ? 'sha384'
+				: req.params.build.length === 128 ? 'sha512'
+				: req.params.build.length === 32 ? 'md5'
+				: null
+
+		if ((!hashType || !req.params.build.match(/^[a-f0-9]+$/)) && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
+			'Write-Host "Build not found"',
+			'exit 1'
+		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
+
+		const build = await req.cache.use(`build::${req.params.build}::installation`, async() => {
+			if (hashType) {
+				return req.database.select({
+					java: req.database.schema.minecraftVersions.java,
+					installation: req.database.schema.builds.installation
+				})
+					.from(req.database.schema.buildHashes)
+					.where(eq(req.database.schema.buildHashes[hashType], req.params.build))
+					.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, req.database.schema.buildHashes.buildId))
+					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.get()
+			} else {
+				return req.database.select({
+					java: req.database.schema.minecraftVersions.java,
+					installation: req.database.schema.builds.installation
+				})
+					.from(req.database.schema.builds)
+					.where(eq(req.database.schema.builds.id, int))
+					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.get()
+			}
+		}, time(6).h())
 
 		if (!build) return new Response([
 			'Write-Host "Build not found"',
 			'exit 1'
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
-
-		const { java } = build.versionId ? await req.cache.use(`version::${build.versionId}`, () => req.database.select()
-				.from(req.database.schema.minecraftVersions)
-				.where(eq(req.database.schema.minecraftVersions.id, build.versionId!))
-				.get(),
-			time(3).h()
-		) ?? { java: 21 } : { java: 21 }
 
 		const steps: string[] = []
 		for (const combined of build.installation) {
@@ -123,11 +183,11 @@ export default function(router: GlobalRouter) {
 
 		return new Response([
 			'Write-Host "Installing Server"',
-			`$env:JAVA_VERSION = ${java}`,
+			`$env:JAVA_VERSION = ${build.java}`,
 			...steps,
 			'',
 			'Write-Host "Installation complete"',
-			`Write-Host "Use Java version: ${java}"`,
+			`Write-Host "Use Java version: ${build.java}"`,
 			'exit 0'
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
 	})
