@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
 import { number, time } from "@rjweb/utils"
-import { and, asc, count, countDistinct, desc, eq, like, max, sql } from "drizzle-orm"
+import { and, asc, count, countDistinct, desc, eq, like, max, min, sql } from "drizzle-orm"
 import cache from "./cache"
 
 const compatibility = [
@@ -222,6 +222,7 @@ export default function database(env: Env) {
 								db.select({
 									builds: count(schema.builds.id).as('builds'),
 									latest: max(schema.builds.id).as('latest'),
+									createdOldest: min(schema.builds.created).as('createdOldest'),
 									projectVersionId: schema.projectVersions.id
 								})
 									.from(schema.projectVersions)
@@ -235,14 +236,18 @@ export default function database(env: Env) {
 							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
 							.all()
 	
-						return Object.fromEntries(versions.map((version) => [
+						return Object.fromEntries(versions.map((version, i) => [
 							version.x.projectVersionId,
 							{
+								type: 'RELEASE',
+								supported: i === versions.length - 1,
+								java: 21,
+								created: version.x.createdOldest,
 								builds: Number(version.x.builds),
 								latest: this.prepare.build(version.builds)
 							}
 						]))
-					})
+					}, time(30).m())
 	
 					return versions
 				}
@@ -268,6 +273,7 @@ export default function database(env: Env) {
 										schema.minecraftVersions.id,
 										schema.minecraftVersions.created,
 										schema.minecraftVersions.supported,
+										schema.minecraftVersions.java,
 										schema.minecraftVersions.type
 									)
 									.orderBy(asc(schema.minecraftVersions.created))
@@ -287,7 +293,7 @@ export default function database(env: Env) {
 								latest: this.prepare.build(version.builds)
 							}
 						]))
-					})
+					}, time(30).m())
 	
 					return versions
 				}
