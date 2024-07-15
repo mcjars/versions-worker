@@ -123,22 +123,24 @@ export default {
 					}
 				}
 
-				database.insert(database.schema.requests)
-					.values({
-						id,
-						ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
-							?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
-						origin: request.headers.get('origin'),
-						created: new Date(start),
-						method: request.method,
-						path,
-						organizationId,
-						status: response.status,
-						time: Date.now() - start,
-						userAgent: request.headers.get('user-agent') ?? 'Unknown',
-						body: await request.json().catch(() => null)
-					})
-					.execute()
+				try {
+					await database.insert(database.schema.requests)
+						.values({
+							id,
+							ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
+								?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
+							origin: request.headers.get('origin'),
+							created: new Date(start),
+							method: request.method,
+							path,
+							organizationId,
+							status: response.status,
+							time: Date.now() - start,
+							userAgent: request.headers.get('user-agent') ?? 'Unknown',
+							body: await request.json().catch(() => null)
+						})
+						.execute()
+				} catch { }
 
 				resolve()
 			}))
