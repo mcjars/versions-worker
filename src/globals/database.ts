@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
 import { number, time } from "@rjweb/utils"
-import { and, count, countDistinct, desc, eq, like, max, sql } from "drizzle-orm"
+import { and, asc, count, countDistinct, desc, eq, like, max, sql } from "drizzle-orm"
 import cache from "./cache"
 
 const compatibility = [
@@ -211,6 +211,87 @@ export default function database(env: Env) {
 			}
 
 			return null
+		},
+
+		async versions(type: schema.ServerType) {
+			switch (type) {
+				case "VELOCITY": {
+					const versions = await cache(env).use('builds::VELOCITY', async() => {
+						const versions = await db.select()
+							.from(
+								db.select({
+									builds: count(schema.builds.id).as('builds'),
+									latest: max(schema.builds.id).as('latest'),
+									projectVersionId: schema.projectVersions.id
+								})
+									.from(schema.projectVersions)
+									.innerJoin(schema.builds, and(
+										eq(schema.builds.projectVersionId, schema.projectVersions.id),
+										eq(schema.builds.type, type)
+									))
+									.groupBy(schema.projectVersions.id)
+									.as('x')
+							)
+							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+							.all()
+	
+						return Object.fromEntries(versions.map((version) => [
+							version.x.projectVersionId,
+							{
+								builds: Number(version.x.builds),
+								latest: this.prepare.build(version.builds)
+							}
+						]))
+					})
+	
+					return versions
+				}
+	
+				default: {
+					const versions = await cache(env).use(`builds::${type}`, async() => {
+						const versions = await db.select()
+							.from(
+								db.select({
+									java: schema.minecraftVersions.java,
+									created: schema.minecraftVersions.created,
+									supported: schema.minecraftVersions.supported,
+									versionType: schema.minecraftVersions.type,
+									builds: count(schema.builds.id).as('builds'),
+									latest: max(schema.builds.id).as('latest')
+								})
+									.from(schema.minecraftVersions)
+									.innerJoin(schema.builds, and(
+										eq(schema.builds.versionId, schema.minecraftVersions.id),
+										eq(schema.builds.type, type)
+									))
+									.groupBy(
+										schema.minecraftVersions.id,
+										schema.minecraftVersions.created,
+										schema.minecraftVersions.supported,
+										schema.minecraftVersions.type
+									)
+									.orderBy(asc(schema.minecraftVersions.created))
+									.as('x')
+							)
+							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+							.all()
+	
+						return Object.fromEntries(versions.map((version) => [
+							version.builds.versionId!,
+							{
+								type: version.x.versionType,
+								supported: version.x.supported,
+								java: version.x.java,
+								created: version.x.created,
+								builds: Number(version.x.builds),
+								latest: this.prepare.build(version.builds)
+							}
+						]))
+					})
+	
+					return versions
+				}
+			}
 		},
 	
 		async version(version: string, type: schema.ServerType): Promise<'minecraft' | 'project' | null> {

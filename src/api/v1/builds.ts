@@ -1,5 +1,5 @@
 import { GlobalRouter } from "../.."
-import { and, asc, count, desc, eq, max, sql } from "drizzle-orm"
+import { and, desc, eq, sql } from "drizzle-orm"
 import { ServerType, types } from "../../schema"
 import { time } from "@rjweb/utils"
 
@@ -8,90 +8,10 @@ export default function(router: GlobalRouter) {
 		const type = req.params.type.toUpperCase() as ServerType
 		if (!types.includes(type)) return Response.json({ success: false, errors: ['Invalid type'] }, { status: 400 })
 
-		switch (type) {
-			case "VELOCITY": {
-				const versions = await req.cache.use('builds::VELOCITY', async() => {
-					const versions = await req.database.select()
-						.from(
-							req.database.select({
-								builds: count(req.database.schema.builds.id).as('builds'),
-								latest: max(req.database.schema.builds.id).as('latest'),
-								projectVersionId: req.database.schema.projectVersions.id
-							})
-								.from(req.database.schema.projectVersions)
-								.innerJoin(req.database.schema.builds, and(
-									eq(req.database.schema.builds.projectVersionId, req.database.schema.projectVersions.id),
-									eq(req.database.schema.builds.type, type)
-								))
-								.groupBy(req.database.schema.projectVersions.id)
-								.as('x')
-						)
-						.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, sql`x.latest`))
-						.all()
-
-					return Object.fromEntries(versions.map((version) => [
-						version.x.projectVersionId,
-						{
-							builds: Number(version.x.builds),
-							latest: req.database.prepare.build(version.builds)
-						}
-					]))
-				})
-
-				return Response.json({
-					success: true,
-					versions
-				})
-			}
-
-			default: {
-				const versions = await req.cache.use(`builds::${type}`, async() => {
-					const versions = await req.database.select()
-						.from(
-							req.database.select({
-								java: req.database.schema.minecraftVersions.java,
-								created: req.database.schema.minecraftVersions.created,
-								supported: req.database.schema.minecraftVersions.supported,
-								versionType: req.database.schema.minecraftVersions.type,
-								builds: count(req.database.schema.builds.id).as('builds'),
-								latest: max(req.database.schema.builds.id).as('latest')
-							})
-								.from(req.database.schema.minecraftVersions)
-								.innerJoin(req.database.schema.builds, and(
-									eq(req.database.schema.builds.versionId, req.database.schema.minecraftVersions.id),
-									eq(req.database.schema.builds.type, type)
-								))
-								.groupBy(
-									req.database.schema.minecraftVersions.id,
-									req.database.schema.minecraftVersions.created,
-									req.database.schema.minecraftVersions.supported,
-									req.database.schema.minecraftVersions.type
-								)
-								.orderBy(asc(req.database.schema.minecraftVersions.created))
-								.as('x')
-						)
-						.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, sql`x.latest`))
-						.all()
-
-					return Object.fromEntries(versions.map((version) => [
-						version.builds.versionId,
-						{
-							type: version.x.versionType,
-							supported: version.x.supported,
-							java: version.x.java,
-							created: version.x.created,
-							builds: Number(version.x.builds),
-							latest: req.database.prepare.build(version.builds)
-						}
-					]))
-				})
-
-				return Response.json({
-					success: true,
-					versions
-				})
-			}
-		}
+		return Response.json({
+			success: true,
+			versions: await req.database.versions(type)
+		})
 	})
 
 	router.get('/api/v1/builds/:type/:version', async({ req }) => {
