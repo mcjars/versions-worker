@@ -1,4 +1,4 @@
-import { time } from "@rjweb/utils"
+import { object, time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { z } from "zod"
 import { ServerType, types } from "../../schema"
@@ -56,6 +56,7 @@ async function lookupBuild(data: z.infer<typeof buildSearch>, req: Parameters<Pa
 					data.zipUrl ? eq(req.database.schema.builds.zipUrl, data.zipUrl) : undefined,
 					data.zipSize ? eq(req.database.schema.builds.zipSize, data.zipSize) : undefined
 				))
+				.limit(1)
 				.get().then((hash) => hash ? hash.builds : null)
 			)
 		} else {
@@ -74,6 +75,7 @@ async function lookupBuild(data: z.infer<typeof buildSearch>, req: Parameters<Pa
 					data.zipSize ? eq(req.database.schema.builds.zipSize, data.zipSize) : undefined,
 					sql`1`
 				))
+				.limit(1)
 				.get()
 			)
 		}
@@ -87,6 +89,11 @@ export default function(router: GlobalRouter) {
 			buildSearch.array().min(1).max(10)
 		]).safeParse(await req.json().catch(() => null))
 
+		const fields = Array.from(new Set((req.query.fields ?? '')
+			.split(',')
+			.filter((field) => field.length > 0)
+		)) as 'id'[]
+
 		if (!data.success) return Response.json({ success: false, errors: data.error.errors.map((err) => `${err.path}: ${err.message}`) }, { status: 400 })
 
 		if (Array.isArray(data.data)) {
@@ -94,7 +101,7 @@ export default function(router: GlobalRouter) {
 
 			return Response.json({
 				success: true,
-				builds
+				builds: builds.map((build) => fields.length > 0 && build ? object.pick(build, fields) : build)
 			})
 		} else {
 			const build = await lookupBuild(data.data, req)
@@ -104,8 +111,8 @@ export default function(router: GlobalRouter) {
 
 			return Response.json({
 				success: true,
-				build,
-				latest,
+				build: fields.length > 0 ? object.pick(build, fields) : build,
+				latest: fields.length > 0 && latest ? object.pick(latest, fields) : latest,
 				version
 			})
 		}

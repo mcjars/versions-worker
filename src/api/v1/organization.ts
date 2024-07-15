@@ -15,6 +15,7 @@ async function validateOrganization(req: Parameters<Parameters<GlobalRouter['any
 			.from(req.database.schema.organizations)
 			.innerJoin(req.database.schema.organizationKeys, eq(req.database.schema.organizationKeys.organizationId, req.database.schema.organizations.id))
 			.where(eq(req.database.schema.organizationKeys.key, req.headers.get('authorization')!))
+			.limit(1)
 			.get().then((organization) => organization?.organizations ?? null),
 		time(5).m()
 	)

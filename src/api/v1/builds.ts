@@ -64,6 +64,7 @@ export default function(router: GlobalRouter) {
 						: eq(req.database.schema.builds.buildNumber, build)
 				))
 				.orderBy(desc(req.database.schema.builds.id))
+				.limit(1)
 				.get().then(req.database.prepare.build),
 			time(3).h()
 		)

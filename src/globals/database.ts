@@ -200,12 +200,14 @@ export default function database(env: Env) {
 					.from(schema.buildHashes)
 					.where(eq(schema.buildHashes[hashType], build))
 					.innerJoin(schema.builds, eq(schema.builds.id, schema.buildHashes.buildId))
+					.limit(1)
 					.get().then((data) => data?.builds)
 				)
 			} else if (int && int > 0 && int < 2147483647) {
 				return this.prepare.build(await db.select()
 					.from(schema.builds)
 					.where(eq(schema.builds.id, int))
+					.limit(1)
 					.get()
 				)
 			}
@@ -307,6 +309,7 @@ export default function database(env: Env) {
 				})
 					.from(schema.minecraftVersions)
 					.where(eq(schema.minecraftVersions.id, version))
+					.limit(1)
 					.get(),
 				db.select({
 					_: sql`1`
@@ -316,6 +319,7 @@ export default function database(env: Env) {
 						eq(schema.projectVersions.type, type),
 						eq(schema.projectVersions.id, version)
 					))
+					.limit(1)
 					.get()
 			]), time(30).m())
 	
@@ -343,6 +347,7 @@ export default function database(env: Env) {
 									.as('x')
 							)
 							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+							.limit(1)
 							.get()
 
 						return [
@@ -379,6 +384,7 @@ export default function database(env: Env) {
 									.as('x')
 							)
 							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+							.limit(1)
 							.get()
 
 						return [
@@ -416,6 +422,7 @@ export default function database(env: Env) {
 									.as('x')
 							)
 							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+							.limit(1)
 							.get()
 
 						return [

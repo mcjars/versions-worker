@@ -9,6 +9,7 @@ export default function(router: GlobalRouter) {
 		const versionData = await req.cache.use(`version::${version}`, () => req.database.select()
 				.from(req.database.schema.minecraftVersions)
 				.where(eq(req.database.schema.minecraftVersions.id, version))
+				.limit(1)
 				.get(),
 			time(3).h()
 		)
@@ -45,6 +46,7 @@ export default function(router: GlobalRouter) {
 		const versionData = await req.cache.use(`version::${version}`, () => req.database.select()
 				.from(req.database.schema.minecraftVersions)
 				.where(eq(req.database.schema.minecraftVersions.id, version))
+				.limit(1)
 				.get(),
 			time(3).h()
 		)
