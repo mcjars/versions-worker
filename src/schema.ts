@@ -88,7 +88,10 @@ export const requests = sqliteTable('requests', {
 	userAgent: text('user_agent', { length: 255 }).notNull(),
 	created: integer('created', { mode: 'timestamp' }).notNull()
 }, (requests) => ({
-	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId))
+	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
+	ipIdx: index('requests_ip_idx').on(requests.ip),
+	statusIdx: index('requests_status_idx').on(requests.status),
+	createdIdx: index('requests_created_idx').on(requests.created)
 }))
 
 export const minecraftVersions = sqliteTable('minecraftVersions', {
@@ -108,8 +111,8 @@ export const projectVersions = sqliteTable('projectVersions', {
 	id: text('id', { length: 31 }).notNull(),
 	type: text('type', { enum: types }).notNull()
 }, (projectVersions) => ({
-	typeIdx: index('projectVersions_type_idx').on(projectVersions.type),
-	pk: primaryKey({ name: 'projectVersions_pk', columns: [projectVersions.type, projectVersions.id] })
+	pk: primaryKey({ name: 'projectVersions_pk', columns: [projectVersions.type, projectVersions.id] }),
+	typeIdx: index('projectVersions_type_idx').on(projectVersions.type)
 }))
 
 export const minecraftVersionsRelations = relations(minecraftVersions, ({ many }) => ({
@@ -189,6 +192,7 @@ export const buildHashes = sqliteTable('buildHashes', {
 	md5: text('md5', { length: 32 }).notNull()
 }, (hashes) => ({
 	buildIdx: index('buildHashes_build_idx').on(hashes.buildId),
+	primaryIdx: index('buildHashes_primary_idx').on(hashes.primary),
 	sha1Idx: index('buildHashes_sha1_idx').on(hashes.sha1),
 	sha224Idx: index('buildHashes_sha224_idx').on(hashes.sha224),
 	sha256Idx: index('buildHashes_sha256_idx').on(hashes.sha256),
@@ -237,6 +241,6 @@ export const buildConfigs = sqliteTable('buildConfigs', {
 	buildId: integer('build_id').notNull().references(() => builds.id, { onDelete: 'cascade' }),
 	configId: integer('config_id').notNull().references(() => configs.id, { onDelete: 'cascade' })
 }, (buildConfigs) => ({
-	buildIdx: index('buildConfigs_build_idx').on(buildConfigs.buildId),
-	pk: primaryKey({ name: 'buildConfigs_pk', columns: [buildConfigs.buildId, buildConfigs.configId] })
+	pk: primaryKey({ name: 'buildConfigs_pk', columns: [buildConfigs.buildId, buildConfigs.configId] }),
+	buildIdx: index('buildConfigs_build_idx').on(buildConfigs.buildId)
 }))

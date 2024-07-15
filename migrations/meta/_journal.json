@@ -29,6 +29,13 @@
       "when": 1720985255364,
       "tag": "0003_worthless_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1721029690127,
+      "tag": "0004_green_the_phantom",
+      "breakpoints": true
     }
   ]
 }
