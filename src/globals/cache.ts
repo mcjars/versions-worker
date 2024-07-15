@@ -1,7 +1,7 @@
 class Cache {
 	constructor(private kv: KVNamespace) {}
 
-	async use<Data extends any>(key: string, fetcher: () => Promise<Data>, time?: number): Promise<Data> {
+	async use<Data extends any>(key: string, fetcher: () => Promise<Data>, time: number): Promise<Data> {
 		const value = await this.kv.get(key, 'json')
 		if (value) return value as Data
 
