@@ -5,7 +5,6 @@ import { RawBuild } from "../../globals/database"
 
 type ReturnRow = RawBuild & {
 	build_count: number
-	version_id: number | null
 	version_type: string | null
 	version_java: string | null
 	version_supported: boolean | null
