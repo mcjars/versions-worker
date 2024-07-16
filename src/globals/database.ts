@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
-import { number, time } from "@rjweb/utils"
-import { and, asc, count, countDistinct, desc, eq, like, max, min, sql } from "drizzle-orm"
+import { time } from "@rjweb/utils"
+import { and, asc, count, countDistinct, eq, like, max, min, sql } from "drizzle-orm"
 import cache from "./cache"
 
 const compatibility = [
@@ -150,6 +150,27 @@ const extraTypeInfos: Record<schema.ServerType, {
 	}
 }
 
+export type RawBuild = {
+	id: number
+	type: schema.ServerType
+
+	version_id: string | null
+	project_version_id: string | null
+	build_number: number
+	experimental: number
+
+	jar_url: string | null
+	jar_size: number | null
+	jar_location: string | null
+	zip_url: string | null
+	zip_size: number | null
+	
+	installation: string
+	changes: string
+
+	created: number
+}
+
 export default function database(env: Env) {
 	const db = drizzle(env.DB, { schema })
 
@@ -179,6 +200,31 @@ export default function database(env: Env) {
 					changes: raw.changes,
 
 					created: raw.created,
+				} as any
+			},
+
+			rawBuild<Data extends RawBuild>(build: Data): Data extends null ? null : Data extends undefined ? null : Data {
+				if (!build) return null as any
+
+				return {
+					id: build.id,
+					type: build.type,
+
+					versionId: build.version_id,
+					projectVersionId: build.project_version_id,
+					buildNumber: build.build_number,
+					experimental: build.experimental,
+
+					jarUrl: build.jar_url,
+					jarSize: build.jar_size,
+					jarLocation: build.jar_location,
+					zipUrl: build.zip_url,
+					zipSize: build.zip_size,
+
+					installation: JSON.parse(build.installation),
+					changes: JSON.parse(build.changes),
+
+					created: build.created,
 				} as any
 			}
 		},
