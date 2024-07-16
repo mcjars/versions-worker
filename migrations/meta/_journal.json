@@ -50,6 +50,13 @@
       "when": 1721128884766,
       "tag": "0006_dry_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1721129614134,
+      "tag": "0007_quick_leo",
+      "breakpoints": true
     }
   ]
 }

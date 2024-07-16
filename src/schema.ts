@@ -88,9 +88,8 @@ export const requests = sqliteTable('requests', {
 	userAgent: text('user_agent', { length: 255 }).notNull(),
 	created: integer('created', { mode: 'timestamp' }).notNull()
 }, (requests) => ({
-	organizationIdx: index('requests_organization_idx').on(requests.organizationId),
+	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
 	ipIdx: index('requests_ip_idx').on(requests.ip),
-	statusIdx: index('requests_status_idx').on(requests.status),
 	createdIdx: index('requests_created_idx').on(requests.created)
 }))
 
