@@ -36,6 +36,20 @@
       "when": 1721029690127,
       "tag": "0004_green_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1721128597556,
+      "tag": "0005_parallel_swarm",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1721128884766,
+      "tag": "0006_dry_paibok",
+      "breakpoints": true
     }
   ]
 }

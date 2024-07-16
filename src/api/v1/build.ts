@@ -13,7 +13,7 @@ type ReturnRow = RawBuild & {
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/build/:build', async({ req }) => {
-		const { results: [ build, latest ] } = await req.cache.use(`build::${req.params.build}`, async() => {
+		const { meta, results: [ build, latest ] } = await req.cache.use(`build::${req.params.build}`, async() => {
 			const int = isNaN(parseInt(req.params.build)) ? -1 : parseInt(req.params.build),
 				hashType = req.params.build.length === 40 ? 'sha1'
 					: req.params.build.length === 56 ? 'sha224'
@@ -36,11 +36,8 @@ export default function(router: GlobalRouter) {
 					WHERE msb.type = (SELECT type FROM current_build)
 					AND (
 						msb.version_id = (SELECT version_id FROM current_build) 
-						OR
-						msb.project_version_id = (SELECT project_version_id FROM current_build)
-					)
-					ORDER BY msb.id DESC
-					LIMIT 1
+						OR msb.project_version_id = (SELECT project_version_id FROM current_build)
+					) ORDER BY msb.id DESC LIMIT 1
 				),
 				builds_count AS (
 					SELECT
@@ -60,36 +57,22 @@ export default function(router: GlobalRouter) {
 						v.supported as version_supported,
 						v.created as version_created,
 						COALESCE((SELECT version_id FROM current_build), (SELECT project_version_id FROM current_build)) AS version_id
-					FROM
-						minecraftVersions v
-					WHERE
-						v.id = COALESCE((SELECT version_id FROM current_build), (SELECT project_version_id FROM current_build))
+					FROM minecraftVersions v
+					WHERE v.id = COALESCE((SELECT version_id FROM current_build), (SELECT project_version_id FROM current_build))
 				)
-				SELECT
-					cb.*,
-					COALESCE(bc.build_count, 0) AS build_count,
-					vd.*
-				FROM
-					current_build cb
-				LEFT JOIN
-					builds_count bc ON bc.version_id = COALESCE(cb.version_id, cb.project_version_id)
-				LEFT JOIN
-					version_data vd ON vd._version_id = COALESCE(cb.version_id, cb.project_version_id)
+
+				SELECT cb.*, COALESCE(bc.build_count, 0) AS build_count, vd.*
+				FROM current_build cb
+				LEFT JOIN builds_count bc ON bc.version_id = COALESCE(cb.version_id, cb.project_version_id)
+				LEFT JOIN version_data vd ON vd._version_id = COALESCE(cb.version_id, cb.project_version_id)
 
 				UNION ALL
 
-				SELECT
-					lb.*,
-					COALESCE(bc.build_count, 0) AS build_count,
-					vd.*
-				FROM
-					latest_build lb
-				LEFT JOIN
-					builds_count bc ON bc.version_id = COALESCE(lb.version_id, lb.project_version_id)
-				LEFT JOIN
-					version_data vd ON vd._version_id = COALESCE(lb.version_id, lb.project_version_id)
-				WHERE
-					COALESCE(lb.version_id, lb.project_version_id) IS NOT NULL;
+				SELECT lb.*, COALESCE(bc.build_count, 0) AS build_count, vd.*
+				FROM latest_build lb
+				LEFT JOIN builds_count bc ON bc.version_id = COALESCE(lb.version_id, lb.project_version_id)
+				LEFT JOIN version_data vd ON vd._version_id = COALESCE(lb.version_id, lb.project_version_id)
+				WHERE COALESCE(lb.version_id, lb.project_version_id) IS NOT NULL;
 			`) as Promise<D1Result<ReturnRow>>
 		}, time(30).m())
 

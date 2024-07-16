@@ -1,0 +1,1 @@
+CREATE INDEX `builds_project_version_idx` ON `builds` (`project_version_id`);
