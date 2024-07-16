@@ -13,7 +13,7 @@ type ReturnRow = RawBuild & {
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/build/:build', async({ req }) => {
-		const { meta, results: [ build, latest ] } = await req.cache.use(`build::${req.params.build}`, async() => {
+		const { results: [ build, latest ] } = await req.cache.use(`build::${req.params.build}`, async() => {
 			const int = isNaN(parseInt(req.params.build)) ? -1 : parseInt(req.params.build),
 				hashType = req.params.build.length === 40 ? 'sha1'
 					: req.params.build.length === 56 ? 'sha224'
