@@ -102,8 +102,8 @@ export default function(router: GlobalRouter) {
 				id: build.version_id || build.project_version_id,
 				type: build.version_type ?? undefined,
 				java: build.version_java ?? undefined,
-				supported: build.version_supported ?? undefined,
-				created: build.version_created ? new Date(build.version_created) : undefined,
+				supported: build.version_supported ? Boolean(build.version_supported) : undefined,
+				created: build.version_created ? new Date(build.version_created * 1000) : undefined,
 				builds: build.build_count
 			}
 		})

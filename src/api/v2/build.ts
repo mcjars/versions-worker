@@ -10,18 +10,18 @@ const buildSearch = z.object({
 		.refine((str) => types.includes(str as 'VANILLA'))
 		.transform((str) => str as ServerType)
 		.optional(),
-	versionId: z.string().optional(),
-	projectVersionId: z.string().nullable().optional(),
+	versionId: z.string().max(31).optional(),
+	projectVersionId: z.string().max(31).nullable().optional(),
 	buildNumber: z.number().int().optional(),
 	experimental: z.boolean().optional(),
 	hash: z.object({
 		primary: z.boolean().optional(),
-		sha1: z.string().optional(),
-		sha224: z.string().optional(),
-		sha256: z.string().optional(),
-		sha384: z.string().optional(),
-		sha512: z.string().optional(),
-		md5: z.string().optional(),
+		sha1: z.string().length(40).optional(),
+		sha224: z.string().length(56).optional(),
+		sha256: z.string().length(64).optional(),
+		sha384: z.string().length(96).optional(),
+		sha512: z.string().length(128).optional(),
+		md5: z.string().length(32).optional()
 	}).optional(),
 	jarUrl: z.string().nullable().optional(),
 	jarSize: z.number().int().nullable().optional(),

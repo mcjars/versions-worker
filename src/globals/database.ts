@@ -213,7 +213,7 @@ export default function database(env: Env) {
 					versionId: build.version_id,
 					projectVersionId: build.project_version_id,
 					buildNumber: build.build_number,
-					experimental: build.experimental,
+					experimental: Boolean(build.experimental),
 
 					jarUrl: build.jar_url,
 					jarSize: build.jar_size,
@@ -224,7 +224,7 @@ export default function database(env: Env) {
 					installation: JSON.parse(build.installation),
 					changes: JSON.parse(build.changes),
 
-					created: build.created,
+					created: build.created ? new Date(build.created * 1000) : null
 				} as any
 			}
 		},
