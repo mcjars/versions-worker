@@ -38,7 +38,7 @@ export default function(router: GlobalRouter) {
 					INNER JOIN spec_build sb
 						ON sb.id = b.id 
 						OR (COALESCE(sb.version_id, sb.project_version_id) = COALESCE(b.version_id, b.project_version_id) AND sb.type = b.type)
-					WHERE (
+					WHERE b.type != 'ARCLIGHT' OR (
 						(sb.project_version_id LIKE '%-fabric' AND b.project_version_id LIKE '%-fabric')
 						OR (sb.project_version_id LIKE '%-forge' AND b.project_version_id LIKE '%-forge')
 						OR (sb.project_version_id LIKE '%-neoforge' AND b.project_version_id LIKE '%-neoforge')
@@ -63,6 +63,8 @@ export default function(router: GlobalRouter) {
 				LEFT JOIN minecraftVersions mv ON mv.id = x.version_id;
 			`) as Promise<D1Result<ReturnRow>>
 		}, time(30).m())
+
+		if (!build || !latest) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
 
 		return Response.json({
 			success: true,
