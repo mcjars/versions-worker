@@ -2,7 +2,7 @@ import { object, time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { z } from "zod"
 import { ServerType, types } from "../../schema"
-import { and, eq, or, sql } from "drizzle-orm"
+import { and, eq, sql } from "drizzle-orm"
 
 const buildSearch = z.object({
 	id: z.number().int().optional(),
@@ -28,6 +28,8 @@ const buildSearch = z.object({
 	zipUrl: z.string().nullable().optional(),
 	zipSize: z.number().int().nullable().optional(),
 })
+
+// NOTE: this still needs to be drastically optimized
 
 async function lookupBuild(data: z.infer<typeof buildSearch>, req: Parameters<Parameters<GlobalRouter['any']>[1]>[0]['req']) {
 	return req.cache.use(`build::${JSON.stringify(data)}`, async() => {

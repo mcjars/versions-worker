@@ -22,7 +22,7 @@ export default function(router: GlobalRouter) {
 			location = await req.database.version(version, type)
 		if (!location) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
-		const builds = await req.cache.use(`builds::${type}::${version}`, () => req.database.select()
+		const builds = await req.cache.use(`builds::${type}::${version}`, () => req.database.select(req.database.fields.build)
 				.from(req.database.schema.builds)
 				.where(and(
 					eq(req.database.schema.builds.type, type),
@@ -52,7 +52,7 @@ export default function(router: GlobalRouter) {
 		const location = await req.database.version(version, type)
 		if (!location) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
 
-		const serverBuild = await req.cache.use(`build::${type}::${version}::buildNumber.${build}`, () => req.database.select()
+		const serverBuild = await req.cache.use(`build::${type}::${version}::buildNumber.${build}`, () => req.database.select(req.database.fields.build)
 				.from(req.database.schema.builds)
 				.where(and(
 					eq(req.database.schema.builds.type, type),

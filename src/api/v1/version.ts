@@ -44,7 +44,7 @@ export default function(router: GlobalRouter) {
 		const version = req.params.version
 
 		const builds = await req.cache.use(`builds::${version}::all`, async() => {
-			const data = await req.database.select()
+			const data = await req.database.select(req.database.fields.build)
 				.from(req.database.schema.builds)
 				.where(eq(req.database.schema.builds.versionId, version))
 				.orderBy(desc(req.database.schema.builds.id))
