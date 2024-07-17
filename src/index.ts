@@ -2,9 +2,9 @@ import { Router } from "@tsndr/cloudflare-worker-router"
 import { string, time } from "@rjweb/utils"
 import db from "./globals/database"
 import ch from "./globals/cache"
+import { eq } from "drizzle-orm"
 
 import apiRouter from "./api/routes"
-import { eq } from "drizzle-orm"
 
 const router = new Router<Env, {}, {
 	database: ReturnType<typeof db>
@@ -14,6 +14,36 @@ const router = new Router<Env, {}, {
 export type GlobalRouter = typeof router
 
 apiRouter(router)
+
+router.get('/', ({ env }) => {
+	return new Response(`
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="${env.S3_URL}/icons/vanilla.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="darkreader-lock" />
+    <title>MCJars API Docs</title>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MCJars">
+    <meta property="og:url" content="https://mcjars.app">
+    <meta property="og:image" content="${env.S3_URL}/icons/vanilla.png">
+    <meta property="og:description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
+    <meta name="description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
+    <meta name="keywords" content="minecraft, server, jar, download, lookup, reverse, lookup, mcjars, site">
+  </head>
+  <body>
+    <script id="api-reference" data-url="/openapi.json"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>
+	`.trim(), {
+		headers: {
+			'Content-Type': 'text/html'
+		}
+	})
+})
 
 router.get('/icons/:type', ({ req, env }) => {
 	const dot = req.params.type.indexOf('.')
@@ -39,8 +69,8 @@ router.get('/download/fabric/:version/:projectVersion/:installerVersion', async(
 		statusText: response.statusText,
 		headers: {
 			...Object.fromEntries(response.headers),
-			'content-type': 'application/java-archive',
-			'content-disposition': `attachment; filename="server.jar"`
+			'Content-Type': 'application/java-archive',
+			'Content-Disposition': `attachment; filename="server.jar"`
 		}
 	})
 })
@@ -59,8 +89,8 @@ router.get('/download/arclight/:branch/:version/:type', async({ req }) => {
 		statusText: response.statusText,
 		headers: {
 			...Object.fromEntries(response.headers),
-			'content-type': 'application/java-archive',
-			'content-disposition': `attachment; filename="server.jar"`
+			'Content-Type': 'application/java-archive',
+			'Content-Disposition': `attachment; filename="server.jar"`
 		}
 	})
 })
@@ -79,8 +109,8 @@ router.get('/download/leaves/:version/:build/:file', async({ req }) => {
 		statusText: response.statusText,
 		headers: {
 			...Object.fromEntries(response.headers),
-			'content-type': 'application/java-archive',
-			'content-disposition': `attachment; filename="server.jar"`
+			'Content-Type': 'application/java-archive',
+			'Content-Disposition': `attachment; filename="server.jar"`
 		}
 	})
 })

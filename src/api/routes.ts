@@ -8,4 +8,7 @@ export default function(router: GlobalRouter) {
 	v2Router(router)
 
 	// openapi still needed
+	router.get('/openapi.json', () => {
+		return Response.redirect('https://versions.mcjars.app/openapi.json', 301)
+	})
 }
