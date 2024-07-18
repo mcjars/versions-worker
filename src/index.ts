@@ -100,7 +100,7 @@ router.get('/download/leaves/:version/:build/:file', async({ req }) => {
 		build = req.params.build,
 		file = req.params.file
 
-	const response = await fetch(`https://api.leavesmc.org/projects/leaves/versions/${version}/builds/${build}/downloads/${file}`)
+	const response = await fetch(`https://api.leavesmc.org/v2/projects/leaves/versions/${version}/builds/${build}/downloads/${file}`)
 	if (!response.ok) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
 
 	return new Response(response.body as ReadableStream, {
