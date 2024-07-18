@@ -1,0 +1,1103 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "bcd08dcd-e38d-4cf2-b96e-7e8be5797987",
+  "prevId": "da312127-8c97-4541-ad05-7a0111ad88ca",
+  "tables": {
+    "buildConfigs": {
+      "name": "buildConfigs",
+      "columns": {
+        "build_id": {
+          "name": "build_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "config_id": {
+          "name": "config_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "config_value_id": {
+          "name": "config_value_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "buildConfigs_build_idx": {
+          "name": "buildConfigs_build_idx",
+          "columns": [
+            "build_id"
+          ],
+          "isUnique": false
+        },
+        "buildConfigs_config_idx": {
+          "name": "buildConfigs_config_idx",
+          "columns": [
+            "config_id"
+          ],
+          "isUnique": false
+        },
+        "buildConfigs_config_value_idx": {
+          "name": "buildConfigs_config_value_idx",
+          "columns": [
+            "config_value_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "buildConfigs_build_id_builds_id_fk": {
+          "name": "buildConfigs_build_id_builds_id_fk",
+          "tableFrom": "buildConfigs",
+          "tableTo": "builds",
+          "columnsFrom": [
+            "build_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "buildConfigs_config_id_configs_id_fk": {
+          "name": "buildConfigs_config_id_configs_id_fk",
+          "tableFrom": "buildConfigs",
+          "tableTo": "configs",
+          "columnsFrom": [
+            "config_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "buildConfigs_config_value_id_configValues_id_fk": {
+          "name": "buildConfigs_config_value_id_configValues_id_fk",
+          "tableFrom": "buildConfigs",
+          "tableTo": "configValues",
+          "columnsFrom": [
+            "config_value_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "buildConfigs_pk": {
+          "columns": [
+            "build_id",
+            "config_id"
+          ],
+          "name": "buildConfigs_pk"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "buildHashes": {
+      "name": "buildHashes",
+      "columns": {
+        "build_id": {
+          "name": "build_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "primary": {
+          "name": "primary",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha1": {
+          "name": "sha1",
+          "type": "text(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha224": {
+          "name": "sha224",
+          "type": "text(56)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha384": {
+          "name": "sha384",
+          "type": "text(96)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha512": {
+          "name": "sha512",
+          "type": "text(128)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "md5": {
+          "name": "md5",
+          "type": "text(32)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "buildHashes_build_idx": {
+          "name": "buildHashes_build_idx",
+          "columns": [
+            "build_id"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_primary_idx": {
+          "name": "buildHashes_primary_idx",
+          "columns": [
+            "primary"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_sha1_idx": {
+          "name": "buildHashes_sha1_idx",
+          "columns": [
+            "sha1"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_sha224_idx": {
+          "name": "buildHashes_sha224_idx",
+          "columns": [
+            "sha224"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_sha256_idx": {
+          "name": "buildHashes_sha256_idx",
+          "columns": [
+            "sha256"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_sha384_idx": {
+          "name": "buildHashes_sha384_idx",
+          "columns": [
+            "sha384"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_sha512_idx": {
+          "name": "buildHashes_sha512_idx",
+          "columns": [
+            "sha512"
+          ],
+          "isUnique": false
+        },
+        "buildHashes_md5_idx": {
+          "name": "buildHashes_md5_idx",
+          "columns": [
+            "md5"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "buildHashes_build_id_builds_id_fk": {
+          "name": "buildHashes_build_id_builds_id_fk",
+          "tableFrom": "buildHashes",
+          "tableTo": "builds",
+          "columnsFrom": [
+            "build_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "builds": {
+      "name": "builds",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "version_id": {
+          "name": "version_id",
+          "type": "text(31)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "project_version_id": {
+          "name": "project_version_id",
+          "type": "text(31)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rehash": {
+          "name": "rehash",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "experimental": {
+          "name": "experimental",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "build_number": {
+          "name": "build_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jar_url": {
+          "name": "jar_url",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jar_size": {
+          "name": "jar_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jar_location": {
+          "name": "jar_location",
+          "type": "text(51)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "zip_url": {
+          "name": "zip_url",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "zip_size": {
+          "name": "zip_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "installation": {
+          "name": "installation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "changes": {
+          "name": "changes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created": {
+          "name": "created",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "builds_type_idx": {
+          "name": "builds_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "builds_experimental_idx": {
+          "name": "builds_experimental_idx",
+          "columns": [
+            "experimental"
+          ],
+          "isUnique": false
+        },
+        "builds_build_number_idx": {
+          "name": "builds_build_number_idx",
+          "columns": [
+            "build_number"
+          ],
+          "isUnique": false
+        },
+        "builds_jar_url_idx": {
+          "name": "builds_jar_url_idx",
+          "columns": [
+            "jar_url"
+          ],
+          "isUnique": false
+        },
+        "builds_jar_size_idx": {
+          "name": "builds_jar_size_idx",
+          "columns": [
+            "jar_size"
+          ],
+          "isUnique": false
+        },
+        "builds_jar_location_idx": {
+          "name": "builds_jar_location_idx",
+          "columns": [
+            "jar_location"
+          ],
+          "isUnique": false
+        },
+        "builds_zip_url_idx": {
+          "name": "builds_zip_url_idx",
+          "columns": [
+            "zip_url"
+          ],
+          "isUnique": false
+        },
+        "builds_zip_size_idx": {
+          "name": "builds_zip_size_idx",
+          "columns": [
+            "zip_size"
+          ],
+          "isUnique": false
+        },
+        "builds_created_idx": {
+          "name": "builds_created_idx",
+          "columns": [
+            "created"
+          ],
+          "isUnique": false
+        },
+        "builds_type_version_idx": {
+          "name": "builds_type_version_idx",
+          "columns": [
+            "type",
+            "version_id"
+          ],
+          "isUnique": false
+        },
+        "builds_type_project_version_idx": {
+          "name": "builds_type_project_version_idx",
+          "columns": [
+            "type",
+            "project_version_id"
+          ],
+          "isUnique": false
+        },
+        "builds_version_idx": {
+          "name": "builds_version_idx",
+          "columns": [
+            "version_id"
+          ],
+          "isUnique": false
+        },
+        "builds_project_version_idx": {
+          "name": "builds_project_version_idx",
+          "columns": [
+            "project_version_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "builds_version_id_minecraftVersions_id_fk": {
+          "name": "builds_version_id_minecraftVersions_id_fk",
+          "tableFrom": "builds",
+          "tableTo": "minecraftVersions",
+          "columnsFrom": [
+            "version_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "builds_project_version_fk": {
+          "name": "builds_project_version_fk",
+          "tableFrom": "builds",
+          "tableTo": "projectVersions",
+          "columnsFrom": [
+            "type",
+            "project_version_id"
+          ],
+          "columnsTo": [
+            "type",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "configValues": {
+      "name": "configValues",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "config_id": {
+          "name": "config_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha1": {
+          "name": "sha1",
+          "type": "text(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha224": {
+          "name": "sha224",
+          "type": "text(56)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha384": {
+          "name": "sha384",
+          "type": "text(96)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "sha512": {
+          "name": "sha512",
+          "type": "text(128)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "md5": {
+          "name": "md5",
+          "type": "text(32)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "configValues_config_idx": {
+          "name": "configValues_config_idx",
+          "columns": [
+            "config_id"
+          ],
+          "isUnique": false
+        },
+        "configValues_unique_config_value_idx": {
+          "name": "configValues_unique_config_value_idx",
+          "columns": [
+            "config_id",
+            "sha1",
+            "sha224",
+            "sha256",
+            "sha384",
+            "sha512",
+            "md5"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "configValues_config_id_configs_id_fk": {
+          "name": "configValues_config_id_configs_id_fk",
+          "tableFrom": "configValues",
+          "tableTo": "configs",
+          "columnsFrom": [
+            "config_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "configs": {
+      "name": "configs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "location": {
+          "name": "location",
+          "type": "text(51)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "format": {
+          "name": "format",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "configs_location_unique": {
+          "name": "configs_location_unique",
+          "columns": [
+            "location"
+          ],
+          "isUnique": true
+        },
+        "configs_type_idx": {
+          "name": "configs_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "configs_format_idx": {
+          "name": "configs_format_idx",
+          "columns": [
+            "format"
+          ],
+          "isUnique": false
+        },
+        "configs_unique_location_idx": {
+          "name": "configs_unique_location_idx",
+          "columns": [
+            "location"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "minecraftVersions": {
+      "name": "minecraftVersions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(31)",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "supported": {
+          "name": "supported",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "java": {
+          "name": "java",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 21
+        },
+        "created": {
+          "name": "created",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "unique_id_idx": {
+          "name": "unique_id_idx",
+          "columns": [
+            "id"
+          ],
+          "isUnique": true
+        },
+        "minecraftVersions_type_idx": {
+          "name": "minecraftVersions_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        },
+        "minecraftVersions_java_idx": {
+          "name": "minecraftVersions_java_idx",
+          "columns": [
+            "java"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "organizationKeys": {
+      "name": "organizationKeys",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "organizationKeys_organization_idx": {
+          "name": "organizationKeys_organization_idx",
+          "columns": [
+            "organization_id"
+          ],
+          "isUnique": false
+        },
+        "organizationKeys_key_idx": {
+          "name": "organizationKeys_key_idx",
+          "columns": [
+            "key"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "organizationKeys_organization_id_organizations_id_fk": {
+          "name": "organizationKeys_organization_id_organizations_id_fk",
+          "tableFrom": "organizationKeys",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "organizations": {
+      "name": "organizations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "types": {
+          "name": "types",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "organizations_name_idx": {
+          "name": "organizations_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "projectVersions": {
+      "name": "projectVersions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(31)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "projectVersions_type_idx": {
+          "name": "projectVersions_type_idx",
+          "columns": [
+            "type"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "projectVersions_pk": {
+          "columns": [
+            "id",
+            "type"
+          ],
+          "name": "projectVersions_pk"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "requests": {
+      "name": "requests",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text(12)",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "text(7)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "time": {
+          "name": "time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ip": {
+          "name": "ip",
+          "type": "text(45)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created": {
+          "name": "created",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "requests_organization_idx": {
+          "name": "requests_organization_idx",
+          "columns": [
+            "organization_id"
+          ],
+          "isUnique": false,
+          "where": "\"requests\".\"organization_id\" is not null"
+        },
+        "requests_ip_idx": {
+          "name": "requests_ip_idx",
+          "columns": [
+            "ip"
+          ],
+          "isUnique": false
+        },
+        "requests_created_idx": {
+          "name": "requests_created_idx",
+          "columns": [
+            "created"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "requests_organization_id_organizations_id_fk": {
+          "name": "requests_organization_id_organizations_id_fk",
+          "tableFrom": "requests",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "webhooks": {
+      "name": "webhooks",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text(63)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "successful": {
+          "name": "successful",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "failed": {
+          "name": "failed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "webhooks_organization_idx": {
+          "name": "webhooks_organization_idx",
+          "columns": [
+            "organization_id"
+          ],
+          "isUnique": false,
+          "where": "\"webhooks\".\"organization_id\" is not null"
+        },
+        "webhooks_enabled_idx": {
+          "name": "webhooks_enabled_idx",
+          "columns": [
+            "enabled"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "webhooks_organization_id_organizations_id_fk": {
+          "name": "webhooks_organization_id_organizations_id_fk",
+          "tableFrom": "webhooks",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "organization_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

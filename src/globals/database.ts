@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/d1"
 import * as schema from "../schema"
 import { time } from "@rjweb/utils"
 import { and, asc, count, countDistinct, eq, like, max, min, sql } from "drizzle-orm"
+import yaml from "js-yaml"
 import cache from "./cache"
 
 const compatibility = [
@@ -250,6 +251,44 @@ export default function database(env: Env) {
 
 				created: schema.builds.created
 			} as const
+		},
+
+		formatConfig(file: string, rawValue: string) {
+			let value = ''
+	
+			for (const line of rawValue.split('\n')) {
+				if (line.startsWith('#')) continue
+				value += line + '\n'
+			}
+	
+			if (file.endsWith('.properties')) {
+				value = value.split('\n')
+					.sort((a, b) => a.split('=')[0].localeCompare(b.split('=')[0]))
+					.join('\n')
+			} else if (file.endsWith('.yml') || file.endsWith('.yaml')) {
+				value = yaml.dump(yaml.load(value), { sortKeys: true })
+			}
+	
+			if (file === 'velocity.toml') {
+				value = value
+					.replace(/forwarding-secret = "(.*)"/, 'forwarding-secret="xxx"')
+			}
+	
+			if (file === 'config.yml') {
+				value = value
+					.replace(/stats_uuid: (.*)/, 'stats_uuid: xxx')
+					.replace(/stats: (.*)/, 'stats: xxx')
+			}
+	
+			if (file === 'leaves.yml') {
+				value = value
+					.replace(/server-id: (.*)/, 'server-id: xxx')
+			}
+	
+			value = value.trim()
+				.replace(/seed-(.*)=(.*)/g, 'seed-$1=xxx')
+	
+			return value
 		},
 
 		async versions(type: schema.ServerType) {

@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240712.0",
+    "@types/js-yaml": "^4.0.9",
     "drizzle-kit": "^0.23.0",
     "typescript": "^5.5.3",
     "wrangler": "^3.64.0"
@@ -17,6 +18,7 @@
     "@rjweb/utils": "^1.12.21",
     "@tsndr/cloudflare-worker-router": "^3.2.4",
     "drizzle-orm": "^0.31.4",
+    "js-yaml": "^4.1.0",
     "zod": "^3.23.8"
   }
 }

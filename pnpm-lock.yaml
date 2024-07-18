@@ -17,6 +17,9 @@ importers:
       drizzle-orm:
         specifier: ^0.31.4
         version: 0.31.4(@cloudflare/workers-types@4.20240712.0)
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -24,6 +27,9 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20240712.0
         version: 4.20240712.0
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       drizzle-kit:
         specifier: ^0.23.0
         version: 0.23.0
@@ -516,6 +522,9 @@ packages:
   '@tsndr/cloudflare-worker-router@3.2.4':
     resolution: {integrity: sha512-/WjyYHFVwmUwQgTEIwf4HAKHGlzb5hQytIXjBE9vGvzif0rbTqtAJn5MNjrE7gM+n/w+D7oT22fpHXZXgl+HYg==}
 
+  '@types/js-yaml@4.0.9':
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
+
   '@types/node-forge@1.3.11':
     resolution: {integrity: sha512-FQx220y22OKNTqaByeBGqHWYz4cl94tpcxeFdvBo3wjG6XPBuZ0BNgNZRV5J5TFmmcsJ4IzsLkmGRiQbnYsBEQ==}
 
@@ -534,6 +543,9 @@ packages:
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
     engines: {node: '>= 8'}
+
+  argparse@2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   as-table@1.0.55:
     resolution: {integrity: sha512-xvsWESUJn0JN421Xb9MQw6AsMHRCUknCe0Wjlxvjud80mU4E6hQf1A6NzQKcYNmYw62MfzEtXc+badstZP3JpQ==}
@@ -757,6 +769,10 @@ packages:
   is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==}
     engines: {node: '>=0.12.0'}
+
+  js-yaml@4.1.0:
+    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
 
   magic-string@0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
@@ -1190,6 +1206,8 @@ snapshots:
 
   '@tsndr/cloudflare-worker-router@3.2.4': {}
 
+  '@types/js-yaml@4.0.9': {}
+
   '@types/node-forge@1.3.11':
     dependencies:
       '@types/node': 20.14.10
@@ -1208,6 +1226,8 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+
+  argparse@2.0.1: {}
 
   as-table@1.0.55:
     dependencies:
@@ -1400,6 +1420,10 @@ snapshots:
       is-extglob: 2.1.1
 
   is-number@7.0.0: {}
+
+  js-yaml@4.1.0:
+    dependencies:
+      argparse: 2.0.1
 
   magic-string@0.25.9:
     dependencies:

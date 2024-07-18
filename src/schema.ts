@@ -20,7 +20,15 @@ export const types = [
 	'LEAVES'
 ] as const
 
+export const formats = [
+	'JSON',
+	'YAML',
+	'CONF',
+	'PROPERTIES'
+] as const
+
 export type ServerType = typeof types[number]
+export type Format = typeof formats[number]
 
 export type InstallStep = {
 	type: 'download'
@@ -213,7 +221,7 @@ export const configs = sqliteTable('configs', {
 
 	location: text('location', { length: 51 }).unique().notNull(),
 	type: text('type', { enum: types }).notNull(),
-	format: text('format', { enum: ['JSON', 'YAML', 'CONF'] }).notNull()
+	format: text('format', { enum: formats }).notNull()
 }, (configs) => ({
 	typeIdx: index('configs_type_idx').on(configs.type),
 	formatIdx: index('configs_format_idx').on(configs.format),
@@ -239,8 +247,11 @@ export const configValues = sqliteTable('configValues', {
 
 export const buildConfigs = sqliteTable('buildConfigs', {
 	buildId: integer('build_id').notNull().references(() => builds.id, { onDelete: 'cascade' }),
-	configId: integer('config_id').notNull().references(() => configs.id, { onDelete: 'cascade' })
+	configId: integer('config_id').notNull().references(() => configs.id, { onDelete: 'cascade' }),
+	configValueId: integer('config_value_id').notNull().references(() => configValues.id, { onDelete: 'cascade' })
 }, (buildConfigs) => ({
 	pk: primaryKey({ name: 'buildConfigs_pk', columns: [buildConfigs.buildId, buildConfigs.configId] }),
-	buildIdx: index('buildConfigs_build_idx').on(buildConfigs.buildId)
+	buildIdx: index('buildConfigs_build_idx').on(buildConfigs.buildId),
+	configIdx: index('buildConfigs_config_idx').on(buildConfigs.configId),
+	configValueIdx: index('buildConfigs_config_value_idx').on(buildConfigs.configValueId)
 }))
