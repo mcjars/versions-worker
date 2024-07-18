@@ -69,8 +69,9 @@ export const organizationKeys = sqliteTable('organizationKeys', {
 
 export const webhooks = sqliteTable('webhooks', {
 	id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
-	organizationId: integer('organization_id').references(() => organizations.id, { onDelete: 'restrict' }).notNull(),
+	organizationId: integer('organization_id').references(() => organizations.id, { onDelete: 'restrict' }),
 
+	label: text('label', { length: 255 }),
 	name: text('name', { length: 63 }).notNull(),
 	avatar: text('avatar', { length: 255 }).notNull(),
 	url: text('url', { length: 255 }).notNull(),

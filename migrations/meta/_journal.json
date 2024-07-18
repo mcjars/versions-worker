@@ -71,6 +71,13 @@
       "when": 1721303218513,
       "tag": "0009_striped_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1721338809410,
+      "tag": "0010_organic_scarecrow",
+      "breakpoints": true
     }
   ]
 }
