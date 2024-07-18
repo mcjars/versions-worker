@@ -243,6 +243,7 @@ export const configValues = sqliteTable('configValues', {
 	value: text('value').notNull()
 }, (configValues) => ({
 	configIdx: index('configValues_config_idx').on(configValues.configId),
+	valueIdx: index('configValues_value_idx').on(configValues.value),
 	uniqueConfigValueIdx: uniqueIndex('configValues_unique_config_value_idx').on(configValues.configId, configValues.sha1, configValues.sha224, configValues.sha256, configValues.sha384, configValues.sha512, configValues.md5)
 }))
 
