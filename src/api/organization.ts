@@ -1,5 +1,5 @@
 import { object, time } from "@rjweb/utils"
-import { GlobalRouter } from "../.."
+import { GlobalRouter } from ".."
 import { and, count, eq, isNotNull } from "drizzle-orm"
 
 async function validateOrganization(req: Parameters<Parameters<GlobalRouter['any']>[1]>[0]['req']) {
@@ -28,7 +28,7 @@ async function validateOrganization(req: Parameters<Parameters<GlobalRouter['any
 }
 
 export default function(router: GlobalRouter) {
-	router.get('/api/v1/organization/stats', async({ req }) => {
+	router.get('/api/organization/v1/stats', async({ req }) => {
 		const organization = await validateOrganization(req)
 		if (organization instanceof Response) return organization
 
@@ -74,7 +74,7 @@ export default function(router: GlobalRouter) {
 		})
 	})
 
-	router.get('/api/v1/organization/types', async({ req }) => {
+	router.get('/api/organization/v1/types', async({ req }) => {
 		const organization = await validateOrganization(req)
 		if (organization instanceof Response) return organization
 
@@ -84,7 +84,7 @@ export default function(router: GlobalRouter) {
 		})
 	})
 
-	router.patch('/api/v1/organization/types', async({ req }) => {
+	router.patch('/api/organization/v1/types', async({ req }) => {
 		const organization = await validateOrganization(req)
 		if (organization instanceof Response) return organization
 

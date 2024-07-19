@@ -1,14 +1,16 @@
 import { GlobalRouter } from ".."
+import openApi from "../openapi-schema.json"
 
 import v1Router from "./v1"
 import v2Router from "./v2"
+import organizationRouter from "./organization"
 
 export default function(router: GlobalRouter) {
 	v1Router(router)
 	v2Router(router)
+	organizationRouter(router)
 
-	// openapi still needed
 	router.get('/openapi.json', () => {
-		return Response.redirect('https://versions.mcjars.app/openapi.json', 301)
+		return Response.json(openApi)
 	})
 }
