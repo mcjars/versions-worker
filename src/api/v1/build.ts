@@ -3,7 +3,7 @@ import { GlobalRouter } from "../.."
 import { sql } from "drizzle-orm"
 import { RawBuild } from "../../globals/database"
 
-type ReturnRow = RawBuild & {
+export type ReturnRow = RawBuild & {
 	build_count: number
 	version_type: string | null
 	version_java: string | null

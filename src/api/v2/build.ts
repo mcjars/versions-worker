@@ -3,6 +3,7 @@ import { GlobalRouter } from "../.."
 import { z } from "zod"
 import { ServerType, types } from "../../schema"
 import { and, eq, sql } from "drizzle-orm"
+import { ReturnRow } from "../v1/build"
 
 const buildSearch = z.object({
 	id: z.number().int().optional(),
@@ -10,12 +11,12 @@ const buildSearch = z.object({
 		.refine((str) => types.includes(str as 'VANILLA'))
 		.transform((str) => str as ServerType)
 		.optional(),
-	versionId: z.string().max(31).optional(),
+	versionId: z.string().max(31).nullable().optional(),
 	projectVersionId: z.string().max(31).nullable().optional(),
 	buildNumber: z.number().int().optional(),
-	experimental: z.boolean().optional(),
+	experimental: z.boolean().transform((b) => +b).optional(),
 	hash: z.object({
-		primary: z.boolean().optional(),
+		primary: z.boolean().transform((b) => +b).optional(),
 		sha1: z.string().length(40).optional(),
 		sha224: z.string().length(56).optional(),
 		sha256: z.string().length(64).optional(),
@@ -29,59 +30,70 @@ const buildSearch = z.object({
 	zipSize: z.number().int().nullable().optional(),
 })
 
-// NOTE: this still needs to be drastically optimized
+function toSnakeCase(str: string) {
+	return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+}
+
+function escapeString(str: string) {
+	return str.replace(/'/g, "''")
+}
 
 async function lookupBuild(data: z.infer<typeof buildSearch>, req: Parameters<Parameters<GlobalRouter['any']>[1]>[0]['req']) {
-	return req.cache.use(`build::${JSON.stringify(data)}`, async() => {
-		if (data.hash && Object.keys(data.hash).length > 0) {
-			return req.database.prepare.build(await req.database.select()
-				.from(req.database.schema.buildHashes)
-				.where(and(
-					data.hash.primary ? eq(req.database.schema.buildHashes.primary, data.hash.primary) : undefined,
-					data.hash.sha1 ? eq(req.database.schema.buildHashes.sha1, data.hash.sha1) : undefined,
-					data.hash.sha224 ? eq(req.database.schema.buildHashes.sha224, data.hash.sha224) : undefined,
-					data.hash.sha256 ? eq(req.database.schema.buildHashes.sha256, data.hash.sha256) : undefined,
-					data.hash.sha384 ? eq(req.database.schema.buildHashes.sha384, data.hash.sha384) : undefined,
-					data.hash.sha512 ? eq(req.database.schema.buildHashes.sha512, data.hash.sha512) : undefined,
-					data.hash.md5 ? eq(req.database.schema.buildHashes.md5, data.hash.md5) : undefined
-				))
-				.innerJoin(req.database.schema.builds, and(
-					eq(req.database.schema.builds.id, req.database.schema.buildHashes.buildId),
-					data.id ? eq(req.database.schema.builds.id, data.id) : undefined,
-					data.type ? eq(req.database.schema.builds.type, data.type) : undefined,
-					data.versionId ? eq(req.database.schema.builds.versionId, data.versionId) : undefined,
-					data.projectVersionId ? eq(req.database.schema.builds.projectVersionId, data.projectVersionId) : undefined,
-					data.buildNumber ? eq(req.database.schema.builds.buildNumber, data.buildNumber) : undefined,
-					data.experimental ? eq(req.database.schema.builds.experimental, data.experimental) : undefined,
-					data.jarUrl ? eq(req.database.schema.builds.jarUrl, data.jarUrl) : undefined,
-					data.jarSize ? eq(req.database.schema.builds.jarSize, data.jarSize) : undefined,
-					data.zipUrl ? eq(req.database.schema.builds.zipUrl, data.zipUrl) : undefined,
-					data.zipSize ? eq(req.database.schema.builds.zipSize, data.zipSize) : undefined
-				))
-				.limit(1)
-				.get().then((hash) => hash ? hash.builds : null)
+	const { results: [ build, latest ] } = await req.cache.use(`build::${JSON.stringify(data)}`, async() => {
+		return req.database.run(sql<[ReturnRow, ReturnRow]>`
+			WITH spec_build AS (
+				SELECT builds.*
+				FROM ${data.hash && Object.keys(data.hash).length > 0
+					? sql.raw('buildHashes INNER JOIN builds ON builds.id = buildHashes.build_id')
+					: sql.identifier('builds')
+				} WHERE ${sql.raw(
+					Object.keys(data).filter((k) => k !== 'hash').map(toSnakeCase).map((key) => `builds.${toSnakeCase(key)} ${typeof data[key as keyof typeof data] === 'number'
+						? `= ${data[key as keyof typeof data]}`
+						: typeof data[key as keyof typeof data] === 'string'
+							? `= '${escapeString(data[key as keyof typeof data] as any)}'`
+							: 'IS NULL'}`)
+					.concat(data.hash && Object.keys(data.hash).length > 0
+						? Object.keys(data.hash).map((key) => `\`${key}\` = ${typeof data.hash![key as keyof typeof data.hash] === 'string'
+							? `'${escapeString(data.hash![key as keyof typeof data.hash] as any)}'`
+							: data.hash![key as keyof typeof data.hash]}`)
+						: []
+					).join(' AND ')
+				)} LIMIT 1
 			)
-		} else {
-			return req.database.prepare.build(await req.database.select()
-				.from(req.database.schema.builds)
-				.where(and(
-					data.id ? eq(req.database.schema.builds.id, data.id) : undefined,
-					data.type ? eq(req.database.schema.builds.type, data.type) : undefined,
-					data.versionId ? eq(req.database.schema.builds.versionId, data.versionId) : undefined,
-					data.projectVersionId ? eq(req.database.schema.builds.projectVersionId, data.projectVersionId) : undefined,
-					data.buildNumber ? eq(req.database.schema.builds.buildNumber, data.buildNumber) : undefined,
-					data.experimental ? eq(req.database.schema.builds.experimental, data.experimental) : undefined,
-					data.jarUrl ? eq(req.database.schema.builds.jarUrl, data.jarUrl) : undefined,
-					data.jarSize ? eq(req.database.schema.builds.jarSize, data.jarSize) : undefined,
-					data.zipUrl ? eq(req.database.schema.builds.zipUrl, data.zipUrl) : undefined,
-					data.zipSize ? eq(req.database.schema.builds.zipSize, data.zipSize) : undefined,
-					sql`1`
-				))
-				.limit(1)
-				.get()
+
+			, filtered_builds AS (
+				SELECT b.*
+				FROM builds b
+				INNER JOIN spec_build sb
+					ON sb.id = b.id 
+					OR (COALESCE(sb.version_id, sb.project_version_id) = COALESCE(b.version_id, b.project_version_id) AND sb.type = b.type)
+				WHERE b.type != 'ARCLIGHT' OR (
+					(sb.project_version_id LIKE '%-fabric' AND b.project_version_id LIKE '%-fabric')
+					OR (sb.project_version_id LIKE '%-forge' AND b.project_version_id LIKE '%-forge')
+					OR (sb.project_version_id LIKE '%-neoforge' AND b.project_version_id LIKE '%-neoforge')
+					OR (sb.project_version_id NOT LIKE '%-fabric' AND sb.project_version_id NOT LIKE '%-forge' AND sb.project_version_id NOT LIKE '%-neoforge')
+				)
 			)
-		}
-	}, time(3).h())
+
+			SELECT *, 0 AS build_count, '' AS _version_id, '' AS version_type, 0 AS version_supported, 0 AS version_java, 0 AS version_created
+			FROM spec_build
+
+			UNION ALL
+
+			SELECT x.*, mv.*
+			FROM (
+				SELECT *
+				FROM (
+					SELECT b.*, count(1) OVER () AS build_count
+					FROM filtered_builds b
+					ORDER BY b.id DESC
+				) LIMIT 1
+			) x
+			LEFT JOIN minecraftVersions mv ON mv.id = x.version_id;
+		`) as Promise<D1Result<ReturnRow>>
+	}, time(30).m())
+
+	return [ build, latest ]
 }
 
 export default function(router: GlobalRouter) {
@@ -103,19 +115,35 @@ export default function(router: GlobalRouter) {
 
 			return Response.json({
 				success: true,
-				builds: builds.map((build) => fields.length > 0 && build ? object.pick(build, fields) : build)
+				builds: builds.map((build) => ({
+					build: fields.length > 0 ? object.pick(build[0], fields) : build[0],
+					latest: fields.length > 0 && build[1] ? object.pick(build[1], fields) : build[1],
+					version: {
+						id: build[1].version_id || build[1].project_version_id,
+						type: build[1].version_type ?? undefined,
+						java: build[1].version_java ?? undefined,
+						supported: build[1].version_supported ? Boolean(build[1].version_supported) : undefined,
+						created: build[1].version_created ? new Date(build[1].version_created * 1000) : undefined,
+						builds: build[1].build_count
+					}
+				}))
 			})
 		} else {
-			const build = await lookupBuild(data.data, req)
-			if (!build) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
-
-			const [ latest, version ] = await req.database.buildLatest(build)
+			const [ build, latest ] = await lookupBuild(data.data, req)
+			if (!build || !latest) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
 
 			return Response.json({
 				success: true,
 				build: fields.length > 0 ? object.pick(build, fields) : build,
 				latest: fields.length > 0 && latest ? object.pick(latest, fields) : latest,
-				version
+				version: {
+					id: latest.version_id || latest.project_version_id,
+					type: latest.version_type ?? undefined,
+					java: latest.version_java ?? undefined,
+					supported: latest.version_supported ? Boolean(latest.version_supported) : undefined,
+					created: latest.version_created ? new Date(latest.version_created * 1000) : undefined,
+					builds: latest.build_count
+				}
 			})
 		}
 	})
