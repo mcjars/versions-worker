@@ -116,8 +116,8 @@ export default function(router: GlobalRouter) {
 			return Response.json({
 				success: true,
 				builds: builds.map((build) => ({
-					build: fields.length > 0 ? object.pick(build[0], fields) : build[0],
-					latest: fields.length > 0 && build[1] ? object.pick(build[1], fields) : build[1],
+					build: fields.length > 0 ? object.pick(req.database.prepare.rawBuild(build[0]), fields) : req.database.prepare.rawBuild(build[0]),
+					latest: fields.length > 0 && build[1] ? object.pick(req.database.prepare.rawBuild(build[1]), fields) : req.database.prepare.rawBuild(build[1]),
 					version: {
 						id: build[1].version_id || build[1].project_version_id,
 						type: build[1].version_type ?? undefined,
@@ -134,8 +134,8 @@ export default function(router: GlobalRouter) {
 
 			return Response.json({
 				success: true,
-				build: fields.length > 0 ? object.pick(build, fields) : build,
-				latest: fields.length > 0 && latest ? object.pick(latest, fields) : latest,
+				build: fields.length > 0 ? object.pick(req.database.prepare.rawBuild(build), fields) : req.database.prepare.rawBuild(build),
+				latest: fields.length > 0 && latest ? object.pick(req.database.prepare.rawBuild(latest), fields) : req.database.prepare.rawBuild(latest),
 				version: {
 					id: latest.version_id || latest.project_version_id,
 					type: latest.version_type ?? undefined,
