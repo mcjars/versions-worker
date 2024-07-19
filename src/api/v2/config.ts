@@ -2,6 +2,14 @@ import { object, time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { z } from "zod"
 
+async function sha256(data: string) {
+	const msgBuffer = new TextEncoder().encode(data)
+	const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+	const hashArray = Array.from(new Uint8Array(hashBuffer))
+	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+	return hashHex
+}
+
 export default function(router: GlobalRouter) {
 	router.post('/api/v2/config', async({ req }) => {
 		const data = z.object({
@@ -18,7 +26,7 @@ export default function(router: GlobalRouter) {
 
 		const formatted = req.database.formatConfig(data.data.file, data.data.config)
 
-		const valueMatches = await req.cache.use(`config::${formatted}`, () => req.database.searchConfig(
+		const valueMatches = await req.cache.use(`config::${await sha256(formatted)}`, () => req.database.searchConfig(
 			data.data.file, formatted,
 			data.data.file.endsWith('.properties')
 				? 'PROPERTIES' : data.data.file.endsWith('.toml')
