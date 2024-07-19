@@ -115,7 +115,7 @@ export default function(router: GlobalRouter) {
 
 			return Response.json({
 				success: true,
-				builds: builds.map((build) => ({
+				builds: builds.map((build) => !build[0] || !build[1] ? null : ({
 					build: fields.length > 0 ? object.pick(req.database.prepare.rawBuild(build[0]), fields) : req.database.prepare.rawBuild(build[0]),
 					latest: fields.length > 0 && build[1] ? object.pick(req.database.prepare.rawBuild(build[1]), fields) : req.database.prepare.rawBuild(build[1]),
 					version: {
