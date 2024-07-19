@@ -128,59 +128,54 @@ router.use(({ req, env }) => {
 
 export default {
 	async fetch(request, env, ctx) {
-		try {
-			const start = Date.now(),
-				path = new URL(request.url).pathname,
-				response = await router.handle(request, env, ctx)
+		const start = Date.now(),
+			path = new URL(request.url).pathname,
+			response = await router.handle(request, env, ctx)
 
-			if (path.startsWith('/api')) {
-				const id = string.generate({ numbers: false }),
-					database = db(env)
-				response.headers.set('X-Request-Id', id)
+		if (path.startsWith('/api')) {
+			const id = string.generate({ numbers: false }),
+				database = db(env)
+			response.headers.set('X-Request-Id', id)
 
-				ctx.waitUntil(new Promise<void>(async(resolve) => {
-					let organizationId: number | null = null
-					if (request.headers.has('authorization') && request.headers.get('authorization')!.length === 64) {
-						const organization = await ch(env).use(`organization::$${request.headers.get('authorization')}`, () => database.select()
-								.from(database.schema.organizations)
-								.innerJoin(database.schema.organizationKeys, eq(database.schema.organizationKeys.organizationId, database.schema.organizations.id))
-								.where(eq(database.schema.organizationKeys.key, request.headers.get('authorization')!))
-								.get().then((organization) => organization?.organizations ?? null),
-							time(5).m()
-						)
-					
-						if (organization) {
-							organizationId = organization.id
-						}
+			ctx.waitUntil(new Promise<void>(async(resolve) => {
+				let organizationId: number | null = null
+				if (request.headers.has('authorization') && request.headers.get('authorization')!.length === 64) {
+					const organization = await ch(env).use(`organization::$${request.headers.get('authorization')}`, () => database.select()
+							.from(database.schema.organizations)
+							.innerJoin(database.schema.organizationKeys, eq(database.schema.organizationKeys.organizationId, database.schema.organizations.id))
+							.where(eq(database.schema.organizationKeys.key, request.headers.get('authorization')!))
+							.get().then((organization) => organization?.organizations ?? null),
+						time(5).m()
+					)
+				
+					if (organization) {
+						organizationId = organization.id
 					}
+				}
 
-					try {
-						await database.insert(database.schema.requests)
-							.values({
-								id,
-								ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
-									?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
-								origin: request.headers.get('origin'),
-								created: new Date(start),
-								method: request.method,
-								path,
-								organizationId,
-								status: response.status,
-								time: Date.now() - start,
-								userAgent: request.headers.get('user-agent') ?? 'Unknown',
-								body: await request.json().catch(() => null)
-							})
-							.execute()
-					} catch { }
+				try {
+					await database.insert(database.schema.requests)
+						.values({
+							id,
+							ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
+								?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
+							origin: request.headers.get('origin'),
+							created: new Date(start),
+							method: request.method,
+							path,
+							organizationId,
+							status: response.status,
+							time: Date.now() - start,
+							userAgent: request.headers.get('user-agent') ?? 'Unknown',
+							body: await request.json().catch(() => null)
+						})
+						.execute()
+				} catch { }
 
-					resolve()
-				}))
-			}
-
-			return response
-		} catch (error) {
-			console.error(error)
-			return Response.json({ success: false, errors: ['Unknown Server Error', 'Report at https://github.com/mcjars/versions-worker'] }, { status: 500 })
+				resolve()
+			}))
 		}
+
+		return response
 	}
 } satisfies ExportedHandler<Env>
