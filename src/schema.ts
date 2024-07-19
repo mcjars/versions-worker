@@ -21,9 +21,9 @@ export const types = [
 ] as const
 
 export const formats = [
-	'JSON',
 	'YAML',
 	'CONF',
+	'TOML',
 	'PROPERTIES'
 ] as const
 

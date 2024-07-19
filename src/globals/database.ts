@@ -151,6 +151,107 @@ const extraTypeInfos: Record<schema.ServerType, {
 	}
 }
 
+export const configs: Record<string, {
+	type: schema.ServerType
+	format: schema.Format
+}> = {
+	// Vanilla
+	'server.properties': {
+		type: 'VANILLA',
+		format: 'PROPERTIES'
+	},
+
+	// Spigot
+	'spigot.yml': {
+		type: 'PAPER',
+		format: 'YAML'
+	}, 'bukkit.yml': {
+		type: 'PAPER',
+		format: 'YAML'
+	},
+
+	// Paper
+	'paper.yml': {
+		type: 'PAPER',
+		format: 'YAML'
+	}, 'config/paper-global.yml': {
+		type: 'PAPER',
+		format: 'YAML'
+	}, 'config/paper-world-defaults.yml': {
+		type: 'PAPER',
+		format: 'YAML'
+	},
+
+	// Pufferfish
+	'pufferfish.yml': {
+		type: 'PUFFERFISH',
+		format: 'YAML'
+	},
+
+	// Purpur
+	'purpur.yml': {
+		type: 'PURPUR',
+		format: 'YAML'
+	},
+
+	// Leaves
+	'leaves.yml': {
+		type: 'LEAVES',
+		format: 'YAML'
+	},
+
+	// Sponge
+	'config/sponge/global.conf': {
+		type: 'SPONGE',
+		format: 'CONF'
+	}, 'config/sponge/sponge.conf': {
+		type: 'SPONGE',
+		format: 'CONF'
+	}, 'config/sponge/tracker.conf': {
+		type: 'SPONGE',
+		format: 'CONF'
+	},
+
+	// Arclight
+	'arclight.conf': {
+		type: 'ARCLIGHT',
+		format: 'CONF'
+	},
+
+	// NeoForge
+	'config/neoforge-server.toml': {
+		type: 'NEOFORGE',
+		format: 'TOML'
+	}, 'config/neoforge-common.toml': {
+		type: 'NEOFORGE',
+		format: 'TOML'
+	},
+
+	// Mohist
+	'mohist-config/mohist.yml': {
+		type: 'MOHIST',
+		format: 'YAML'
+	},
+
+	// Velocity
+	'velocity.toml': {
+		type: 'VELOCITY',
+		format: 'TOML'
+	},
+
+	// BungeeCord
+	'config.yml': {
+		type: 'BUNGEECORD',
+		format: 'YAML'
+	},
+
+	// Waterfall
+	'waterfall.yml': {
+		type: 'WATERFALL',
+		format: 'YAML'
+	},
+}
+
 export type RawBuild = {
 	id: number
 	type: schema.ServerType
@@ -289,6 +390,93 @@ export default function database(env: Env) {
 				.replace(/seed-(.*)=(.*)/g, 'seed-$1=xxx')
 	
 			return value
+		},
+
+		async searchConfig(name: string, config: string, format: schema.Format, matches: number) {
+			const file = Object.keys(configs).find((file) => file.endsWith(name))
+			if (!file) return []
+
+			let contains: string | null = null
+
+			switch (format) {
+				case "YAML": {
+					if (!contains) {
+						const configVersion = config.match(/config-version:\s*(.+)/)?.[1]
+						if (configVersion) contains = `config-version: ${configVersion}`
+					}
+
+					if (!contains) {
+						const configVersion = config.match(/version:\s*(.+)/)?.[1]
+						if (configVersion) contains = `version: ${configVersion}`
+					}
+
+					break
+				}
+
+				case "TOML": {
+					if (!contains) {
+						const configVersion = config.match(/config-version\s*=\s*(.+)/)?.[1]
+						if (configVersion) contains = `config-version = ${configVersion}`
+					}
+
+					break
+				}
+			}
+
+			if (!contains) return []
+			// old prisma postgres code, not sure how to convert to drizzle with d1 yet
+			/*if (!contains) {
+				const query = await database.$queryRaw<{ id: string }[]>`
+					SELECT cv.id FROM "minecraftServerConfigValues" cv
+					JOIN "minecraftServerConfigs" c ON cv."configId" = c.id
+					WHERE
+						c."type" = ${configs[file].type}::"MinecraftServerType" AND
+						c."format" = ${format}::"Format"
+					ORDER BY SIMILARITY("value", ${config}) DESC
+					LIMIT 3
+				`
+
+				return database.minecraftServerConfigValue.findMany({
+					where: {
+						id: {
+							in: query.map((c) => c.id)
+						}
+					}, select: {
+						builds: {
+							select: {
+								build: {
+									select
+								}
+							}, where: {
+								build: {
+									type: configs[file].type
+								}
+							}, take: 1,
+							orderBy: {
+								buildId: 'asc'
+							}
+						}, config: {
+							select: {
+								type: true
+							}
+						}, value: true
+					}
+				})
+			}*/
+
+			return db.select()
+				.from(schema.buildConfigs)
+				.innerJoin(schema.configValues, eq(schema.configValues.id, schema.buildConfigs.configValueId))
+				.innerJoin(schema.configs, eq(schema.configs.id, schema.configValues.configId))
+				.where(and(
+					eq(schema.configs.type, configs[file].type),
+					eq(schema.configs.format, format),
+					like(schema.configValues.value, `%${contains}%`)
+				))
+				.innerJoin(schema.builds, eq(schema.builds.id, schema.buildConfigs.buildId))
+				.groupBy(schema.configValues.id)
+				.limit(matches)
+				.all()
 		},
 
 		async versions(type: schema.ServerType) {

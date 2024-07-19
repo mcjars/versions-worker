@@ -108,7 +108,7 @@ export default function(router: GlobalRouter) {
 			.filter((field) => field.length > 0)
 		)) as 'id'[]
 
-		if (!data.success) return Response.json({ success: false, errors: data.error.errors.map((err) => `${err.path}: ${err.message}`) }, { status: 400 })
+		if (!data.success) return Response.json({ success: false, errors: data.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`) }, { status: 400 })
 
 		if (Array.isArray(data.data)) {
 			const builds = await Promise.all(data.data.map((build) => lookupBuild(build, req)))
