@@ -1880,44 +1880,6 @@
           }
         }
       },
-      "hash": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "primary": {
-              "type": "boolean"
-            },
-            "sha1": {
-              "type": "string"
-            },
-            "sha224": {
-              "type": "string"
-            },
-            "sha256": {
-              "type": "string"
-            },
-            "sha384": {
-              "type": "string"
-            },
-            "sha512": {
-              "type": "string"
-            },
-            "md5": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "primary",
-            "sha1",
-            "sha224",
-            "sha256",
-            "sha384",
-            "sha512",
-            "md5"
-          ]
-        }
-      },
       "installationStep": {
         "oneOf": [
           {
@@ -2023,9 +1985,6 @@
           },
           "experimental": {
             "type": "boolean"
-          },
-          "hash": {
-            "$ref": "#/components/schemas/hash"
           },
           "created": {
             "oneOf": [
