@@ -75,6 +75,7 @@ export const webhooks = sqliteTable('webhooks', {
 	name: text('name', { length: 63 }).notNull(),
 	avatar: text('avatar', { length: 255 }).notNull(),
 	url: text('url', { length: 255 }).notNull(),
+	types: text('types', { mode: 'json' }).$type<ServerType[]>().default([...types]).notNull(),
 	enabled: integer('enabled', { mode: 'boolean' }).default(true).notNull(),
 	successful: integer('successful').default(0).notNull(),
 	failed: integer('failed').default(0).notNull()
