@@ -2163,6 +2163,9 @@
       "minifiedVersion": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -2185,6 +2188,7 @@
           }
         },
         "required": [
+          "id",
           "type",
           "supported",
           "java",
