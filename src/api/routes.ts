@@ -8,7 +8,7 @@ export default function(router: GlobalRouter) {
 	v1Router(router)
 	v2Router(router)
 	organizationRouter(router)
-	
+
 	router.get('/openapi.json', () => {
 		return Response.json(openApi)
 	})
