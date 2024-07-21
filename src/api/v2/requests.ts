@@ -230,20 +230,18 @@ export default function(router: GlobalRouter) {
 
 		return Response.json({
 			success: true,
-			requests: {
-				root: object.pick(requests.find((stat) => stat.version === '/') ?? { total: 0, uniqueIps: 0 }, ['total', 'uniqueIps']),
-				versions: Array.from({ length: end.getDate() }, (_, i) => {
-					const data = mappedRequests.filter((stat) => stat.day === i + 1)
+			requests: Array.from({ length: end.getDate() }, (_, i) => {
+				const data = mappedRequests.filter((stat) => stat.day === i + 1)
 
-					return {
-						day: i + 1,
-						requests: Object.fromEntries(data.filter((stat) => stat.version).map((stat) => [
-							stat.version,
-							object.pick(stat, ['total', 'uniqueIps'])
-						]))
-					}
-				})
-			}
+				return {
+					day: i + 1,
+					root: object.pick(requests.find((stat) => stat.version === '/' && parseInt(stat.day) === i + 1) ?? { total: 0, uniqueIps: 0 }, ['total', 'uniqueIps']),
+					requests: Object.fromEntries(data.filter((stat) => stat.version).map((stat) => [
+						stat.version,
+						object.pick(stat, ['total', 'uniqueIps'])
+					]))
+				}
+			})
 		})
 	})
 }

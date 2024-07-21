@@ -1360,58 +1360,50 @@
                       "const": true
                     },
                     "requests": {
-                      "type": "object",
-                      "properties": {
-                        "root": {
-                          "type": "object",
-                          "properties": {
-                            "total": {
-                              "type": "integer"
-                            },
-                            "uniqueIps": {
-                              "type": "number"
-                            }
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "day": {
+                            "type": "integer"
                           },
-                          "required": [
-                            "total",
-                            "uniqueIps"
-                          ]
-                        },
-                        "versions": {
-                          "type": "array",
-                          "items": {
+                          "root": {
                             "type": "object",
                             "properties": {
-                              "day": {
+                              "total": {
                                 "type": "integer"
                               },
-                              "requests": {
-                                "type": "object",
-                                "additionalProperties": {
-                                  "total": {
-                                    "type": "integer"
-                                  },
-                                  "uniqueIps": {
-                                    "type": "number"
-                                  }
-                                },
-                                "required": [
-                                  "total",
-                                  "uniqueIps"
-                                ]
+                              "uniqueIps": {
+                                "type": "number"
                               }
                             },
                             "required": [
-                              "day",
-                              "requests"
+                              "total",
+                              "uniqueIps"
+                            ]
+                          },
+                          "requests": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "total": {
+                                "type": "integer"
+                              },
+                              "uniqueIps": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "total",
+                              "uniqueIps"
                             ]
                           }
-                        }
-                      },
-                      "required": [
-                        "root",
-                        "versions"
-                      ]
+                        },
+                        "required": [
+                          "day",
+                          "root",
+                          "requests"
+                        ]
+                      }
                     }
                   },
                   "required": [
