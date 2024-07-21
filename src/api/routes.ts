@@ -6,15 +6,15 @@ import v2Router from "./v2"
 import organizationRouter from "./organization"
 
 export default function(router: GlobalRouter) {
-    v1Router(router)
-    v2Router(router)
-    organizationRouter(router)
+	v1Router(router)
+	v2Router(router)
+	organizationRouter(router)
+	
+	router.get('/openapi.json', () => {
+		return Response.json(openApi)
+	})
 
-    router.get('/openapi.json', () => {
-        return Response.json(openApi)
-    })
-    router.get('/robots.txt', () => {
-    	return new Response("User-agent: *\nDisallow: /api", {
-        	headers: { "Content-Type": "text/plain" }
-    })
+	router.get('/robots.txt', () => {
+		return new Response('User-agent: *\nDisallow: /api')
+	})
 }
