@@ -32,7 +32,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.buildHashes)
 					.where(eq(req.database.schema.buildHashes[hashType], req.params.build))
 					.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, req.database.schema.buildHashes.buildId))
-					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.leftJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
 					.get()
 			} else {
 				return req.database.select({
@@ -41,7 +41,7 @@ export default function(router: GlobalRouter) {
 				})
 					.from(req.database.schema.builds)
 					.where(eq(req.database.schema.builds.id, int))
-					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.leftJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
 					.get()
 			}
 		}, time(6).h())
@@ -127,7 +127,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.buildHashes)
 					.where(eq(req.database.schema.buildHashes[hashType], req.params.build))
 					.innerJoin(req.database.schema.builds, eq(req.database.schema.builds.id, req.database.schema.buildHashes.buildId))
-					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.leftJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
 					.get()
 			} else {
 				return req.database.select({
@@ -136,7 +136,7 @@ export default function(router: GlobalRouter) {
 				})
 					.from(req.database.schema.builds)
 					.where(eq(req.database.schema.builds.id, int))
-					.innerJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
+					.leftJoin(req.database.schema.minecraftVersions, eq(req.database.schema.minecraftVersions.id, req.database.schema.builds.versionId))
 					.get()
 			}
 		}, time(6).h())
