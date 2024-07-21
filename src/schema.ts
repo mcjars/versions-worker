@@ -100,6 +100,7 @@ export const requests = sqliteTable('requests', {
 }, (requests) => ({
 	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
 	ipIdx: index('requests_ip_idx').on(requests.ip),
+	pathIdx: index('requests_path_idx').on(requests.path),
 	createdIdx: index('requests_created_idx').on(requests.created)
 }))
 

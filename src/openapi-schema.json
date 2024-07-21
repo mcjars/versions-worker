@@ -875,6 +875,155 @@
         ]
       }
     },
+    "/api/v2/stats/{type}/{version}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "stats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "builds": {
+                            "type": "integer"
+                          },
+                          "hashes": {
+                            "type": "integer"
+                          },
+                          "size": {
+                            "type": "object",
+                            "properties": {
+                              "total": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              },
+                              "average": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "total",
+                              "average"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "builds",
+                          "hashes",
+                          "size"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for a Version of a Project",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          },
+          {
+            "description": "Version",
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1.17.1"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
+      }
+    },
     "/api/v2/stats/{type}": {
       "get": {
         "responses": {
@@ -973,6 +1122,349 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/types"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/stats/{type}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "stats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "builds": {
+                            "type": "integer"
+                          },
+                          "hashes": {
+                            "type": "integer"
+                          },
+                          "size": {
+                            "type": "object",
+                            "properties": {
+                              "total": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              },
+                              "average": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "total",
+                              "average"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "builds",
+                          "hashes",
+                          "size"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for a Project",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/requests/{type}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "requests": {
+                      "type": "object",
+                      "properties": {
+                        "root": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "uniqueIps": {
+                              "type": "number"
+                            }
+                          }, "required": [
+                            "total",
+                            "uniqueIps"
+                          ]
+                        },
+                        "versions": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "total": {
+                                "type": "integer"
+                              },
+                              "uniqueIps": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "total",
+                              "uniqueIps"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "root",
+                        "versions"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "requests"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for a Project",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/requests/{type}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "requests": {
+                      "type": "object",
+                      "properties": {
+                        "root": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "uniqueIps": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "uniqueIps"
+                          ]
+                        },
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": {
+                                "type": "integer"
+                              },
+                              "requests": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "total": {
+                                    "type": "integer"
+                                  },
+                                  "uniqueIps": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "total",
+                                  "uniqueIps"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "day",
+                              "requests"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "root",
+                        "versions"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "requests"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for a Project",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
             }
           }
         ]
@@ -1077,6 +1569,297 @@
             "schema": {
               "type": "string",
               "example": "1.17.1"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/stats/version/{version}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "stats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "builds": {
+                            "type": "integer"
+                          },
+                          "hashes": {
+                            "type": "integer"
+                          },
+                          "size": {
+                            "type": "object",
+                            "properties": {
+                              "total": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              },
+                              "average": {
+                                "type": "object",
+                                "properties": {
+                                  "jar": {
+                                    "type": "integer"
+                                  },
+                                  "zip": {
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "jar",
+                                  "zip"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "total",
+                              "average"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "builds",
+                          "hashes",
+                          "size"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for all Projects for a minecraft version",
+        "parameters": [
+          {
+            "description": "Minecraft Version",
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1.17.1"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/requests/version/{version}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "requests": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "uniqueIps": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "uniqueIps"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "requests"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for all Projects for a minecraft version",
+        "parameters": [
+          {
+            "description": "Minecraft Version",
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1.17.1"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/requests/version/{version}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "requests": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "uniqueIps": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "day",
+                            "total",
+                            "uniqueIps"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "requests"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Version not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Stats of all Builds for all Projects for a minecraft version",
+        "parameters": [
+          {
+            "description": "Minecraft Version",
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "1.17.1"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
             }
           }
         ]
