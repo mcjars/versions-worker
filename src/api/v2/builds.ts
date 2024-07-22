@@ -1,7 +1,7 @@
 import { object, time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { ServerType, types } from "../../schema"
-import { and, count, desc, eq, ne } from "drizzle-orm"
+import { and, count, desc, eq } from "drizzle-orm"
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v2/builds/version/:version', async({ req }) => {
