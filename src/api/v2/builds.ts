@@ -117,7 +117,7 @@ export default function(router: GlobalRouter) {
 
 		return Response.json({
 			success: true,
-			changes: builds.map((build) => ({
+			changes: builds.filter((build) => build.changes.length).map((build) => ({
 				id: build.id,
 				changes: build.changes
 			}))
