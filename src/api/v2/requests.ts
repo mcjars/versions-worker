@@ -66,8 +66,6 @@ export default function(router: GlobalRouter) {
 			time(30).m()
 		)
 
-		if (!requests?.length) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
-
 		return Response.json({
 			success: true,
 			requests: Object.fromEntries(req.database.schema.types.map((type) => [
