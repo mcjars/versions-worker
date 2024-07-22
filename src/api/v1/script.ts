@@ -90,13 +90,13 @@ export default function(router: GlobalRouter) {
 
 		return new Response([
 			'#!/bin/bash',
-			`export JAVA_VERSION=${build.java}`,
+			`export JAVA_VERSION=${build.java ?? 21}`,
 			'',
 			'echo "Installing Server"',
 			...steps,
 			'',
 			'echo "Installation complete"',
-			`echo "Use Java version: ${build.java}"`,
+			`echo "Use Java version: ${build.java ?? 21}"`,
 			'exit 0'
 		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
 	})
@@ -183,11 +183,11 @@ export default function(router: GlobalRouter) {
 
 		return new Response([
 			'Write-Host "Installing Server"',
-			`$env:JAVA_VERSION = ${build.java}`,
+			`$env:JAVA_VERSION = ${build.java ?? 21}`,
 			...steps,
 			'',
 			'Write-Host "Installation complete"',
-			`Write-Host "Use Java version: ${build.java}"`,
+			`Write-Host "Use Java version: ${build.java ?? 21}"`,
 			'exit 0'
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
 	})
