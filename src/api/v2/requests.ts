@@ -73,13 +73,13 @@ export default function(router: GlobalRouter) {
 			requests: Object.fromEntries(req.database.schema.types.map((type) => [
 				type,
 				Array.from({ length: end.getDate() }, (_, i) => {
-					const data = requests.filter((stat) => stat.type === type && parseInt(stat.day) === i + 1)
+					const data = requests.find((stat) => stat.type === type && parseInt(stat.day) === i + 1)
 
-					return data.map((stat) => ({
-						day: parseInt(stat.day),
-						total: stat.total,
-						uniqueIps: stat.uniqueIps
-					}))
+					return {
+						day: i + 1,
+						total: data?.total ?? 0,
+						uniqueIps: data?.uniqueIps ?? 0
+					}
 				})
 			]))
 		})
