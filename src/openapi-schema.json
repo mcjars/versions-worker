@@ -2077,12 +2077,23 @@
                         },
                         "requests": {
                           "type": "integer"
+                        },
+                        "size": {
+                          "type": "object",
+                          "properties": {
+                            "database": {
+                              "type": "integer"
+                            }
+                          }, "required": [
+                            "database"
+                          ]
                         }
                       },
                       "required": [
                         "builds",
                         "hashes",
-                        "requests"
+                        "requests",
+                        "size"
                       ]
                     }
                   },
