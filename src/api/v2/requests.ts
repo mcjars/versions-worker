@@ -236,7 +236,7 @@ export default function(router: GlobalRouter) {
 				return {
 					day: i + 1,
 					root: object.pick(requests.find((stat) => stat.version === '/' && parseInt(stat.day) === i + 1) ?? { total: 0, uniqueIps: 0 }, ['total', 'uniqueIps']),
-					requests: Object.fromEntries(data.filter((stat) => stat.version).map((stat) => [
+					versions: Object.fromEntries(data.filter((stat) => stat.version).map((stat) => [
 						stat.version,
 						object.pick(stat, ['total', 'uniqueIps'])
 					]))

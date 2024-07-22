@@ -1382,7 +1382,7 @@
                               "uniqueIps"
                             ]
                           },
-                          "requests": {
+                          "versions": {
                             "type": "object",
                             "additionalProperties": {
                               "total": {
@@ -1401,7 +1401,7 @@
                         "required": [
                           "day",
                           "root",
-                          "requests"
+                          "versions"
                         ]
                       }
                     }
