@@ -106,7 +106,6 @@ export default function(router: GlobalRouter) {
 				.from(req.database.schema.builds)
 				.where(and(
 					eq(req.database.schema.builds.type, type),
-					ne(req.database.schema.builds.changes, []),
 					location === 'minecraft'
 						? eq(req.database.schema.builds.versionId, version)
 						: eq(req.database.schema.builds.projectVersionId, version)
