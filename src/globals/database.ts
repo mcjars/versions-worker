@@ -13,6 +13,7 @@ const compatibility = [
 
 const extraTypeInfos: Record<schema.ServerType, {
 	name: string
+	color: string
 	homepage: string
 	deprecated: boolean
 	experimental: boolean
@@ -22,6 +23,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 }> = {
 	VANILLA: {
 		name: 'Vanilla',
+		color: '#3B2A22',
 		homepage: 'https://minecraft.net/en-us/download/server',
 		deprecated: false,
 		experimental: false,
@@ -30,6 +32,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: []
 	}, PAPER: {
 		name: 'Paper',
+		color: '#444444',
 		homepage: 'https://papermc.io/software/paper',
 		deprecated: false,
 		experimental: false,
@@ -38,6 +41,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['spigot', 'paper']
 	}, PUFFERFISH: {
 		name: 'Pufferfish',
+		color: '#FFA647',
 		homepage: 'https://pufferfish.host/downloads',
 		deprecated: false,
 		experimental: false,
@@ -46,6 +50,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['spigot', 'paper']
 	}, FOLIA: {
 		name: 'Folia',
+		color: '#3CC5D2',
 		homepage: 'https://papermc.io/software/folia',
 		deprecated: false,
 		experimental: true,
@@ -54,6 +59,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['folia']
 	}, PURPUR: {
 		name: 'Purpur',
+		color: '#C92BFF',
 		homepage: 'https://purpurmc.org',
 		deprecated: false,
 		experimental: false,
@@ -62,6 +68,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['spigot', 'paper', 'purpur']
 	}, WATERFALL: {
 		name: 'Waterfall',
+		color: '#193CB2',
 		homepage: 'https://papermc.io/software/waterfall',
 		deprecated: true,
 		experimental: false,
@@ -70,6 +77,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['bungeecord']
 	}, VELOCITY: {
 		name: 'Velocity',
+		color: '#1BBAE0',
 		homepage: 'https://papermc.io/software/velocity',
 		deprecated: false,
 		experimental: false,
@@ -78,6 +86,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['velocity']
 	}, FABRIC: {
 		name: 'Fabric',
+		color: '#C6BBA5',
 		homepage: 'https://fabricmc.net',
 		deprecated: false,
 		experimental: false,
@@ -86,6 +95,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['fabric']
 	}, BUNGEECORD: {
 		name: 'BungeeCord',
+		color: '#D4B451',
 		homepage: 'https://www.spigotmc.org/wiki/bungeecord-installation',
 		deprecated: false,
 		experimental: false,
@@ -94,6 +104,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['bungeecord']
 	}, QUILT: {
 		name: 'Quilt',
+		color: '#9722FF',
 		homepage: 'https://quiltmc.org',
 		deprecated: false,
 		experimental: true,
@@ -102,6 +113,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['fabric', 'quilt']
 	}, FORGE: {
 		name: 'Forge',
+		color: '#DFA86A',
 		homepage: 'https://files.minecraftforge.net/net/minecraftforge/forge',
 		deprecated: false,
 		experimental: false,
@@ -110,6 +122,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['forge']
 	}, NEOFORGE: {
 		name: 'NeoForge',
+		color: '#D7742F',
 		homepage: 'https://neoforged.net',
 		deprecated: false,
 		experimental: false,
@@ -118,6 +131,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['forge', 'neoforge']
 	}, MOHIST: {
 		name: 'Mohist',
+		color: '#2A3294',
 		homepage: 'https://mohistmc.com/software/mohist',
 		deprecated: false,
 		experimental: false,
@@ -126,6 +140,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['forge', 'spigot', 'paper']
 	}, ARCLIGHT: {
 		name: 'Arclight',
+		color: '#F4FDE5',
 		homepage: 'https://github.com/IzzelAliz/Arclight',
 		deprecated: false,
 		experimental: false,
@@ -134,6 +149,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['fabric', 'spigot', 'forge', 'neoforge']
 	}, SPONGE: {
 		name: 'Sponge',
+		color: '#F7CF0D',
 		homepage: 'https://www.spongepowered.org',
 		deprecated: false,
 		experimental: false,
@@ -142,6 +158,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		compatibility: ['sponge']
 	}, LEAVES: {
 		name: 'Leaves',
+		color: '#40794F',
 		homepage: 'https://leavesmc.org/software/leaves',
 		deprecated: false,
 		experimental: false,

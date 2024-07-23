@@ -278,6 +278,9 @@
                           "icon": {
                             "type": "string"
                           },
+                          "color": {
+                            "type": "string"
+                          },
                           "homepage": {
                             "type": "string"
                           },
@@ -2136,6 +2139,9 @@
                             "type": "string"
                           },
                           "icon": {
+                            "type": "string"
+                          },
+                          "color": {
                             "type": "string"
                           },
                           "homepage": {
