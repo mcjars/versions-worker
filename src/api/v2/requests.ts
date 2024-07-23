@@ -14,6 +14,7 @@ export default function(router: GlobalRouter) {
 			})
 				.from(req.database.schema.requests)
 				.where(and(
+					eq(req.database.schema.requests.status, 200),
 					like(req.database.schema.requests.path, `/api/v_/builds/%`),
 					like(req.database.schema.requests.path, `%/${version}%`),
 					inArray(sql`type`, [...req.database.schema.types])
@@ -54,6 +55,7 @@ export default function(router: GlobalRouter) {
 			})
 				.from(req.database.schema.requests)
 				.where(and(
+					eq(req.database.schema.requests.status, 200),
 					like(req.database.schema.requests.path, `/api/v_/builds/%`),
 					like(req.database.schema.requests.path, `%/${version}%`),
 					gte(req.database.schema.requests.created, start),
@@ -112,7 +114,10 @@ export default function(router: GlobalRouter) {
 					)`.as('version')
 				})
 					.from(req.database.schema.requests)
-					.where(like(req.database.schema.requests.path, `/api/v_/builds/${type}%`))
+					.where(and(
+						eq(req.database.schema.requests.status, 200),
+						like(req.database.schema.requests.path, `/api/v_/builds/${type}%`)
+					))
 					.groupBy(sql`version`)
 					.orderBy(desc(sql`total`))
 					.all(),
@@ -193,6 +198,7 @@ export default function(router: GlobalRouter) {
 				})
 					.from(req.database.schema.requests)
 					.where(and(
+						eq(req.database.schema.requests.status, 200),
 						like(req.database.schema.requests.path, `/api/v_/builds/${type}%`),
 						gte(req.database.schema.requests.created, start),
 						lte(req.database.schema.requests.created, end)
