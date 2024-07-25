@@ -11,7 +11,7 @@ async function validateOrganization(req: Parameters<Parameters<GlobalRouter['any
 		return Response.json({ success: false, errors: ['Invalid Authorization header'] }, { status: 401 })
 	}
 
-	const organization = await req.cache.use(`organization::$${req.headers.get('authorization')}`, () => req.database.select()
+	const organization = await req.cache.use(`organization::${req.headers.get('authorization')}`, () => req.database.select()
 			.from(req.database.schema.organizations)
 			.innerJoin(req.database.schema.organizationKeys, eq(req.database.schema.organizationKeys.organizationId, req.database.schema.organizations.id))
 			.where(eq(req.database.schema.organizationKeys.key, req.headers.get('authorization')!))
