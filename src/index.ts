@@ -21,7 +21,7 @@ router.get('/', ({ env }) => {
 <html>
   <head>
     <meta charset="UTF-8" />
-    <script defer data-domain="versions.mcjars.app" src="https://analytics.rjns.dev/js/script.js"></script>
+    <script defer data-domain="versions.mcjars.app" src="https://cat.rjns.dev/js/script.js"></script>
     <link rel="icon" type="image/png" href="${env.S3_URL}/icons/vanilla.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="darkreader-lock" />
