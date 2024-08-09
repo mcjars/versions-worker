@@ -2775,6 +2775,10 @@
           "buildNumber": {
             "type": "integer"
           },
+          "name": {
+            "type": "string",
+            "description": "The name of the build, usually the build number with a prefixed #."
+          },
           "experimental": {
             "type": "boolean"
           },

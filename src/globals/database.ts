@@ -307,6 +307,7 @@ export default function database(env: Env) {
 					versionId: raw.versionId,
 					projectVersionId: raw.projectVersionId,
 					buildNumber: raw.buildNumber,
+					name: raw.buildNumber === 1 ? raw.projectVersionId ?? `#${raw.buildNumber}` : `#${raw.buildNumber}`,
 					experimental: raw.experimental,
 
 					jarUrl: raw.jarUrl,
@@ -332,6 +333,7 @@ export default function database(env: Env) {
 					versionId: build.version_id,
 					projectVersionId: build.project_version_id,
 					buildNumber: build.build_number,
+					name: build.build_number === 1 ? build.project_version_id ?? `#${build.build_number}` : `#${build.build_number}`,
 					experimental: Boolean(build.experimental),
 
 					jarUrl: build.jar_url,
