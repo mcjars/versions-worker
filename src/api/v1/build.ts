@@ -26,7 +26,7 @@ export default function(router: GlobalRouter) {
 			return req.database.run(sql<[ReturnRow, ReturnRow]>`
 				WITH spec_build AS (
 					SELECT builds.*
-					FROM ${hashType && req.params.build.match(/^[a-f0-9]+$/)
+					FROM ${hashType
 							? sql`buildHashes INNER JOIN builds ON builds.id = buildHashes.build_id WHERE ${sql.identifier(hashType)} = ${req.params.build}`
 							: sql`builds WHERE id = ${int}`
 					} LIMIT 1

@@ -16,7 +16,7 @@ export default function(router: GlobalRouter) {
 				: req.params.build.length === 32 ? 'md5'
 				: null
 
-		if ((!hashType || !req.params.build.match(/^[a-f0-9]+$/)) && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
+		if (!hashType && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
 			'#!/bin/bash',
 			'',
 			'echo "Build not found"',
@@ -113,7 +113,7 @@ export default function(router: GlobalRouter) {
 				: req.params.build.length === 32 ? 'md5'
 				: null
 
-		if ((!hashType || !req.params.build.match(/^[a-f0-9]+$/)) && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
+		if (!hashType && (isNaN(int) || int < 0 || int > 2147483647)) return new Response([
 			'Write-Host "Build not found"',
 			'exit 1'
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))

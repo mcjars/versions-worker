@@ -69,7 +69,7 @@ router.get('/download/fabric/:version/:projectVersion/:installerVersion', async(
 		status: response.status,
 		statusText: response.statusText,
 		headers: {
-			...Object.fromEntries(response.headers),
+			...Object.fromEntries(response.headers.entries()),
 			'Content-Type': 'application/java-archive',
 			'Content-Disposition': `attachment; filename="server.jar"`
 		}
@@ -89,7 +89,7 @@ router.get('/download/arclight/:branch/:version/:type', async({ req }) => {
 		status: response.status,
 		statusText: response.statusText,
 		headers: {
-			...Object.fromEntries(response.headers),
+			...Object.fromEntries(response.headers.entries()),
 			'Content-Type': 'application/java-archive',
 			'Content-Disposition': `attachment; filename="server.jar"`
 		}
@@ -109,7 +109,7 @@ router.get('/download/leaves/:version/:build/:file', async({ req }) => {
 		status: response.status,
 		statusText: response.statusText,
 		headers: {
-			...Object.fromEntries(response.headers),
+			...Object.fromEntries(response.headers.entries()),
 			'Content-Type': 'application/java-archive',
 			'Content-Disposition': `attachment; filename="server.jar"`
 		}
