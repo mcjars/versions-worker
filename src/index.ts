@@ -133,10 +133,11 @@ router.use(({ req, env }) => {
 export default {
 	async fetch(request, env, ctx) {
 		const start = Date.now(),
-			path = new URL(request.url).pathname,
+			url = new URL(request.url),
+			path = url.pathname.concat(url.search),
 			response = await router.handle(request, env, ctx)
 
-		if (path.startsWith('/api')) {
+		if (path.startsWith('/api') && !url.searchParams.has('tracking')) {
 			const id = string.generate({ numbers: false }),
 				database = db(env)
 			response.headers.set('X-Request-Id', id)
@@ -151,7 +152,7 @@ export default {
 							.get().then((organization) => organization?.organizations ?? null),
 						time(5).m()
 					)
-				
+
 					if (organization) {
 						organizationId = organization.id
 					}

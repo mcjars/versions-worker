@@ -1,4 +1,4 @@
-import { and, count, countDistinct, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm"
+import { and, count, countDistinct, desc, eq, gte, inArray, like, lte, notLike, sql } from "drizzle-orm"
 import { GlobalRouter } from "../.."
 import { types, ServerType } from "../../schema"
 import { object, time } from "@rjweb/utils"
@@ -15,6 +15,7 @@ export default function(router: GlobalRouter) {
 				.from(req.database.schema.requests)
 				.where(and(
 					eq(req.database.schema.requests.status, 200),
+					notLike(req.database.schema.requests.path, `%tracking=nostats%`),
 					like(req.database.schema.requests.path, `/api/v_/builds/%`),
 					like(req.database.schema.requests.path, `%/${version}%`),
 					inArray(sql`type`, [...req.database.schema.types])
@@ -56,6 +57,7 @@ export default function(router: GlobalRouter) {
 				.from(req.database.schema.requests)
 				.where(and(
 					eq(req.database.schema.requests.status, 200),
+					notLike(req.database.schema.requests.path, `%tracking=nostats%`),
 					like(req.database.schema.requests.path, `/api/v_/builds/%`),
 					like(req.database.schema.requests.path, `%/${version}%`),
 					gte(req.database.schema.requests.created, start),
@@ -116,6 +118,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.requests)
 					.where(and(
 						eq(req.database.schema.requests.status, 200),
+						notLike(req.database.schema.requests.path, `%tracking=nostats%`),
 						like(req.database.schema.requests.path, `/api/v_/builds/${type}%`)
 					))
 					.groupBy(sql`version`)
@@ -199,6 +202,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.requests)
 					.where(and(
 						eq(req.database.schema.requests.status, 200),
+						notLike(req.database.schema.requests.path, `%tracking=nostats%`),
 						like(req.database.schema.requests.path, `/api/v_/builds/${type}%`),
 						gte(req.database.schema.requests.created, start),
 						lte(req.database.schema.requests.created, end)
