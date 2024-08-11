@@ -68,11 +68,7 @@ router.get('/download/fabric/:version/:projectVersion/:installerVersion', async(
 		...response,
 		status: response.status,
 		statusText: response.statusText,
-		headers: {
-			...Object.fromEntries(response.headers.entries()),
-			'Content-Type': 'application/java-archive',
-			'Content-Disposition': `attachment; filename="server.jar"`
-		}
+		headers: Object.fromEntries(response.headers.entries())
 	})
 })
 
@@ -88,11 +84,7 @@ router.get('/download/arclight/:branch/:version/:type', async({ req }) => {
 		...response,
 		status: response.status,
 		statusText: response.statusText,
-		headers: {
-			...Object.fromEntries(response.headers.entries()),
-			'Content-Type': 'application/java-archive',
-			'Content-Disposition': `attachment; filename="server.jar"`
-		}
+		headers: Object.fromEntries(response.headers.entries())
 	})
 })
 
@@ -108,11 +100,22 @@ router.get('/download/leaves/:version/:build/:file', async({ req }) => {
 		...response,
 		status: response.status,
 		statusText: response.statusText,
-		headers: {
-			...Object.fromEntries(response.headers.entries()),
-			'Content-Type': 'application/java-archive',
-			'Content-Disposition': `attachment; filename="server.jar"`
-		}
+		headers: Object.fromEntries(response.headers.entries())
+	})
+})
+
+router.get('/download/canvas/:build/:file', async({ req }) => {
+	const build = req.params.build,
+		file = req.params.file
+
+	const response = await fetch(`https://github.com/CraftCanvasMC/Canvas/releases/download/${build}/${file}`)
+	if (!response.ok) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
+
+	return new Response(response.body as ReadableStream, {
+		...response,
+		status: response.status,
+		statusText: response.statusText,
+		headers: Object.fromEntries(response.headers.entries())
 	})
 })
 

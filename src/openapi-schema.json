@@ -3050,6 +3050,7 @@
           "VANILLA",
           "PAPER",
           "PUFFERFISH",
+          "SPIGOT",
           "FOLIA",
           "PURPUR",
           "WATERFALL",
@@ -3062,7 +3063,8 @@
           "MOHIST",
           "ARCLIGHT",
           "SPONGE",
-          "LEAVES"
+          "LEAVES",
+          "CANVAS"
         ]
       }
     },

@@ -5,6 +5,7 @@ export const types = [
 	'VANILLA',
 	'PAPER',
 	'PUFFERFISH',
+	'SPIGOT',
 	'FOLIA',
 	'PURPUR',
 	'WATERFALL',
@@ -17,7 +18,8 @@ export const types = [
 	'MOHIST',
 	'ARCLIGHT',
 	'SPONGE',
-	'LEAVES'
+	'LEAVES',
+	'CANVAS'
 ] as const
 
 export const formats = [

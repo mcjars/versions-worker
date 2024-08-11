@@ -48,6 +48,15 @@ const extraTypeInfos: Record<schema.ServerType, {
 		description: 'A fork of Paper that aims to be even more performant.',
 		categories: ['plugins'],
 		compatibility: ['spigot', 'paper']
+	}, SPIGOT: {
+		name: 'Spigot',
+		color: '#F7CF0D',
+		homepage: 'https://www.spigotmc.org',
+		deprecated: false,
+		experimental: false,
+		description: 'A high performance fork of the Bukkit Minecraft Server.',
+		categories: ['plugins'],
+		compatibility: ['spigot']
 	}, FOLIA: {
 		name: 'Folia',
 		color: '#3CC5D2',
@@ -165,6 +174,15 @@ const extraTypeInfos: Record<schema.ServerType, {
 		description: 'A fork of paper that aims to restore vanilla behavior and add new features.',
 		categories: ['plugins'],
 		compatibility: ['spigot', 'paper']
+	}, CANVAS: {
+		name: 'Canvas',
+		color: '#3D11AE',
+		homepage: 'https://github.com/CraftCanvasMC/Canvas',
+		deprecated: false,
+		experimental: true,
+		description: 'A fork of purpur that aims to be more performant and have better apis.',
+		categories: ['plugins'],
+		compatibility: ['spigot', 'paper', 'purpur']
 	}
 }
 
@@ -214,6 +232,12 @@ export const configs: Record<string, {
 	// Leaves
 	'leaves.yml': {
 		type: 'LEAVES',
+		format: 'YAML'
+	},
+
+	// Canvas
+	'canvas.yml': {
+		type: 'CANVAS',
 		format: 'YAML'
 	},
 
