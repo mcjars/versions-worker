@@ -137,7 +137,7 @@ export default {
 			path = url.pathname.concat(url.search),
 			response = await router.handle(request, env, ctx)
 
-		if (path.startsWith('/api') && !url.searchParams.has('tracking')) {
+		if (path.startsWith('/api') && url.searchParams.get('tracking') !== 'none') {
 			const id = string.generate({ numbers: false }),
 				database = db(env)
 			response.headers.set('X-Request-Id', id)
