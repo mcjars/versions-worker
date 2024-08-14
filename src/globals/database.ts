@@ -431,6 +431,7 @@ export default function database(env: Env) {
 	
 			value = value.trim()
 				.replace(/seed-(.*)=(.*)/g, 'seed-$1=xxx')
+				.replace(/seed-(.*): (.*)/g, 'seed-$1: xxx')
 	
 			return value
 		},
