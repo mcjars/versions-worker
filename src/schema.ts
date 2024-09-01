@@ -106,6 +106,9 @@ export const requests = sqliteTable('requests', {
 	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
 	ipIdx: index('requests_ip_idx').on(requests.ip),
 	pathIdx: index('requests_path_idx').on(requests.path),
+	continentIdx: index('requests_continent_idx').on(requests.continent).where(isNotNull(requests.continent)),
+	countryIdx: index('requests_country_idx').on(requests.country).where(isNotNull(requests.country)),
+	dataIdx: index('requests_data_idx').on(requests.data).where(isNotNull(requests.data)),
 	createdIdx: index('requests_created_idx').on(requests.created)
 }))
 
