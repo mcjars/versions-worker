@@ -66,6 +66,16 @@ export default function(router: GlobalRouter) {
 
 		if (!build || !latest) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
 
+		req.data.type = 'lookup'
+		req.data.build = {
+			id: build.id,
+			type: build.type,
+			versionId: build.version_id,
+			projectVersionId: build.project_version_id,
+			buildNumber: build.build_number,
+			java: build.version_java
+		}
+
 		return Response.json({
 			success: true,
 			build: req.database.prepare.rawBuild(build),

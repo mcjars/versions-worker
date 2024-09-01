@@ -9,6 +9,7 @@ import apiRouter from "./api/routes"
 const router = new Router<Env, {}, {
 	database: ReturnType<typeof db>
 	cache: ReturnType<typeof ch>
+	data: Record<string, any>
 }>()
 
 export type GlobalRouter = typeof router
@@ -125,9 +126,12 @@ router.any('*', () => {
 
 router.cors()
 
+const data: Record<string, any> = {}
+
 router.use(({ req, env }) => {
 	req.database = db(env)
 	req.cache = ch(env)
+	req.data = data
 })
 
 export default {
@@ -164,6 +168,9 @@ export default {
 							id,
 							ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
 								?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
+							continent: request.cf?.continent,
+							country: request.cf?.country,
+							data: Object.keys(data).length ? data : null,
 							origin: request.headers.get('origin'),
 							created: new Date(start),
 							method: request.method,

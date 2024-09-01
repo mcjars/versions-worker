@@ -26,6 +26,11 @@ export default function(router: GlobalRouter) {
 		const build = await req.cache.use(`build::${req.params.build}::installation`, async() => {
 			if (hashType) {
 				return req.database.select({
+					id: req.database.schema.builds.id,
+					type: req.database.schema.builds.type,
+					version_id: req.database.schema.builds.versionId,
+					project_version_id: req.database.schema.builds.projectVersionId,
+					build_number: req.database.schema.builds.buildNumber,
 					java: req.database.schema.minecraftVersions.java,
 					installation: req.database.schema.builds.installation
 				})
@@ -36,6 +41,11 @@ export default function(router: GlobalRouter) {
 					.get()
 			} else {
 				return req.database.select({
+					id: req.database.schema.builds.id,
+					type: req.database.schema.builds.type,
+					version_id: req.database.schema.builds.versionId,
+					project_version_id: req.database.schema.builds.projectVersionId,
+					build_number: req.database.schema.builds.buildNumber,
 					java: req.database.schema.minecraftVersions.java,
 					installation: req.database.schema.builds.installation
 				})
@@ -52,6 +62,16 @@ export default function(router: GlobalRouter) {
 			'echo "Build not found"',
 			'exit 1'
 		].filter((line) => !line.startsWith('echo') || echo).join('\n'))
+
+		req.data.type = 'script'
+		req.data.build = {
+			id: build.id,
+			type: build.type,
+			versionId: build.version_id,
+			projectVersionId: build.project_version_id,
+			buildNumber: build.build_number,
+			java: build.java
+		}
 
 		const steps: string[] = []
 		for (const combined of build.installation) {
@@ -121,6 +141,11 @@ export default function(router: GlobalRouter) {
 		const build = await req.cache.use(`build::${req.params.build}::installation`, async() => {
 			if (hashType) {
 				return req.database.select({
+					id: req.database.schema.builds.id,
+					type: req.database.schema.builds.type,
+					version_id: req.database.schema.builds.versionId,
+					project_version_id: req.database.schema.builds.projectVersionId,
+					build_number: req.database.schema.builds.buildNumber,
 					java: req.database.schema.minecraftVersions.java,
 					installation: req.database.schema.builds.installation
 				})
@@ -131,6 +156,11 @@ export default function(router: GlobalRouter) {
 					.get()
 			} else {
 				return req.database.select({
+					id: req.database.schema.builds.id,
+					type: req.database.schema.builds.type,
+					version_id: req.database.schema.builds.versionId,
+					project_version_id: req.database.schema.builds.projectVersionId,
+					build_number: req.database.schema.builds.buildNumber,
 					java: req.database.schema.minecraftVersions.java,
 					installation: req.database.schema.builds.installation
 				})
@@ -145,6 +175,16 @@ export default function(router: GlobalRouter) {
 			'Write-Host "Build not found"',
 			'exit 1'
 		].filter((line) => !line.startsWith('Write-Host') || echo).join('\n'))
+
+		req.data.type = 'script'
+		req.data.build = {
+			id: build.id,
+			type: build.type,
+			versionId: build.version_id,
+			projectVersionId: build.project_version_id,
+			buildNumber: build.build_number,
+			java: build.java
+		}
 
 		const steps: string[] = []
 		for (const combined of build.installation) {

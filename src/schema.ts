@@ -97,6 +97,9 @@ export const requests = sqliteTable('requests', {
 	status: integer('status').notNull(),
 	body: text('body', { mode: 'json' }),
 	ip: text('ip', { length: 45 }).notNull(),
+	continent: text('continent', { length: 2 }),
+	country: text('country', { length: 2 }),
+	data: text('data', { mode: 'json' }),
 	userAgent: text('user_agent', { length: 255 }).notNull(),
 	created: integer('created', { mode: 'timestamp' }).notNull()
 }, (requests) => ({

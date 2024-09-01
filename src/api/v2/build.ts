@@ -2,7 +2,7 @@ import { object, time } from "@rjweb/utils"
 import { GlobalRouter } from "../.."
 import { z } from "zod"
 import { ServerType, types } from "../../schema"
-import { and, eq, sql } from "drizzle-orm"
+import { sql } from "drizzle-orm"
 import { ReturnRow } from "../v1/build"
 
 const buildSearch = z.object({
@@ -131,6 +131,16 @@ export default function(router: GlobalRouter) {
 		} else {
 			const [ build, latest ] = await lookupBuild(data.data, req)
 			if (!build || !latest) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
+
+			req.data.type = 'lookup'
+			req.data.build = {
+				id: build.id,
+				type: build.type,
+				versionId: build.version_id,
+				projectVersionId: build.project_version_id,
+				buildNumber: build.build_number,
+				java: build.version_java
+			}
 
 			return Response.json({
 				success: true,
