@@ -139,7 +139,7 @@ export default function(router: GlobalRouter) {
 				versionId: build.version_id,
 				projectVersionId: build.project_version_id,
 				buildNumber: build.build_number,
-				java: build.version_java
+				java: latest.version_java
 			}
 
 			return Response.json({
