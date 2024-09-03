@@ -188,7 +188,7 @@ export default {
 			}))
 		}
 
-		for (const key in data) delete data[key]
+		for (const key of Object.keys(data)) delete data[key]
 
 		return response
 	}
