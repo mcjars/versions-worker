@@ -188,6 +188,8 @@ export default {
 			}))
 		}
 
+		for (const key in data) delete data[key]
+
 		return response
 	}
 } satisfies ExportedHandler<Env>
