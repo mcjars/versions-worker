@@ -46,7 +46,7 @@ export default function(router: GlobalRouter) {
 		if (isNaN(month) || month < 1 || month > 12) return Response.json({ success: false, errors: ['Invalid month'] }, { status: 400 })
 
 		const start = new Date(year, month - 1, 1),
-			end = new Date(year, month, 0)
+			end = new Date(year, month, 0, 23, 59, 59, 999)
 
 		const requests = await req.cache.use(`requests::version::${version}::history::${start.getTime()}::${end.getTime()}`, () => req.database.select({
 				total: count().as('total'),
@@ -172,7 +172,7 @@ export default function(router: GlobalRouter) {
 		if (isNaN(month) || month < 1 || month > 12) return Response.json({ success: false, errors: ['Invalid month'] }, { status: 400 })
 
 		const start = new Date(year, month - 1, 1),
-			end = new Date(year, month, 0)
+			end = new Date(year, month, 0, 23, 59, 59, 999)
 
 		const [ requests, mcVersions, projectVersions ] = await Promise.all([
 			req.cache.use(`requests::${type}::history::${start.getTime()}::${end.getTime()}`, () => req.database.select({
