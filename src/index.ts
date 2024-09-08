@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm"
 
 import apiRouter from "./api/routes"
 
-const router = new Router<Env, {}, {
+const router = new Router<Env & { data: Record<string, any> }, {}, {
 	database: ReturnType<typeof db>
 	cache: ReturnType<typeof ch>
 	data: Record<string, any>
@@ -126,20 +126,20 @@ router.any('*', () => {
 
 router.cors()
 
-const data: Record<string, any> = {}
-
 router.use(({ req, env }) => {
 	req.database = db(env)
 	req.cache = ch(env)
-	req.data = data
+	req.data = env.data
 })
 
 export default {
 	async fetch(request, env, ctx) {
+		const data: Record<string, any> = {}
+
 		const start = Date.now(),
 			url = new URL(request.url),
 			path = url.pathname.concat(url.search),
-			response = await router.handle(request, env, ctx)
+			response = await router.handle(request, Object.assign(env, { data }), ctx)
 
 		if (path.startsWith('/api') && url.searchParams.get('tracking') !== 'none') {
 			const id = string.generate({ numbers: false }),
@@ -187,8 +187,6 @@ export default {
 				resolve()
 			}))
 		}
-
-		for (const key of Object.keys(data)) delete data[key]
 
 		return response
 	}
