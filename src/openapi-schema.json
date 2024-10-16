@@ -1465,6 +1465,162 @@
         ]
       }
     },
+    "/api/v2/shares/versions": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "versions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "total": {
+                            "type": "integer"
+                          },
+                          "uniqueIps": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "total",
+                          "uniqueIps"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "versions"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Shares of all Versions for all Projects for all Lookup Requests"
+      }
+    },
+    "/api/v2/shares/versions/{type}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "versions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "total": {
+                            "type": "integer"
+                          },
+                          "uniqueIps": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "total",
+                          "uniqueIps"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "versions"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Shares of all Versions for a Project for all Lookup Requests",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/shares/types": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "types": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "total": {
+                            "type": "integer"
+                          },
+                          "uniqueIps": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "total",
+                          "uniqueIps"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "types"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": "Get Shares of all Projects for all Versions for all Lookup Requests"
+      }
+    },
     "/api/v2/stats/version/{version}": {
       "get": {
         "responses": {
