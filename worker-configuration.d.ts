@@ -18,4 +18,5 @@ interface Env {
 	KV: KVNamespace
 
 	S3_URL: string
+	PROXY_AUTH: string
 }

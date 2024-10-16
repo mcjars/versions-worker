@@ -9,15 +9,15 @@
     "lint": "tsc"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240903.0",
+    "@cloudflare/workers-types": "^4.20241011.0",
     "@types/js-yaml": "^4.0.9",
     "drizzle-kit": "^0.24.2",
-    "typescript": "^5.5.4",
-    "wrangler": "^3.75.0"
+    "typescript": "^5.6.3",
+    "wrangler": "^3.80.4"
   },
   "dependencies": {
-    "@rjweb/utils": "^1.12.21",
-    "@tsndr/cloudflare-worker-router": "^3.2.4",
+    "@rjweb/utils": "^1.12.24",
+    "@tsndr/cloudflare-worker-router": "3.2.4",
     "drizzle-orm": "^0.31.4",
     "js-yaml": "^4.1.0",
     "zod": "^3.23.8"

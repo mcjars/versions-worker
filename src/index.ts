@@ -162,12 +162,14 @@ export default {
 					}
 				}
 
+				const ip = env.PROXY_AUTH ? request.headers.get('x-forwarded-for') ?? request.headers.get('cf-connecting-ip')
+					: request.headers.get('cf-connecting-ip')
+
 				try {
 					await database.insert(database.schema.requests)
 						.values({
 							id,
-							ip: request.headers.get('x-real-ip')?.split(',')?.at(-1)?.trim()
-								?? request.headers.get('cf-connecting-ip') ?? '0.0.0.0',
+							ip: ip ?? '0.0.0.0',
 							continent: request.cf?.continent,
 							country: request.cf?.country,
 							data: Object.keys(data).length ? data : null,

@@ -5,6 +5,7 @@ node_compat = true
 
 [vars]
 S3_URL="https://s3.mcjars.app"
+PROXY_AUTH=""
 
 [[d1_databases]]
 binding = "DB"
