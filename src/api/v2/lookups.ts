@@ -95,13 +95,15 @@ export default function(router: GlobalRouter) {
 		const type = req.params.type.toUpperCase() as ServerType
 		if (!types.includes(type)) return Response.json({ success: false, errors: ['Invalid type'] }, { status: 400 })
 
+		const selector = type === 'VELOCITY' ? '$.build.projectVersionId' : '$.build.versionId'
+
 		const versions = await req.cache.use(`lookups::versions::${type}`, () => req.database.select({
 				version: sql<string>`x.version`.as('version'),
 				total: count().as('total'),
 				uniqueIps: countDistinct(req.database.schema.requests.ip)
 			})
 				.from(req.database.select({
-					version: sql<string>`json_extract(${req.database.schema.requests.data}, '$.build.versionId')`.as('version'),
+					version: sql<string>`json_extract(${req.database.schema.requests.data}, ${selector})`.as('version'),
 					ip: req.database.schema.requests.ip
 				})
 					.from(req.database.schema.requests)
@@ -141,6 +143,8 @@ export default function(router: GlobalRouter) {
 		const start = new Date(year, month - 1, 1),
 			end = new Date(year, month, 0, 23, 59, 59, 999)
 
+		const selector = type === 'VELOCITY' ? '$.build.projectVersionId' : '$.build.versionId'
+
 		const versions = await req.cache.use(`lookups::versions::${type}::history::${start.getTime()}::${end.getTime()}`, () => req.database.select({
 				version: sql<string>`x.version`.as('version'),
 				day: sql<string>`strftime('%d', datetime(x.created, 'unixepoch'))`.as('day'),
@@ -148,7 +152,7 @@ export default function(router: GlobalRouter) {
 				uniqueIps: countDistinct(req.database.schema.requests.ip)
 			})
 				.from(req.database.select({
-					version: sql<string>`json_extract(${req.database.schema.requests.data}, '$.build.versionId')`.as('version'),
+					version: sql<string>`json_extract(${req.database.schema.requests.data}, ${selector})`.as('version'),
 					created: req.database.schema.requests.created,
 					ip: req.database.schema.requests.ip
 				})
