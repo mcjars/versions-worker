@@ -1,12 +1,11 @@
-import { count, countDistinct, sql } from "drizzle-orm"
+import { count, sql, sum } from "drizzle-orm"
 import { GlobalRouter } from "../.."
 import { time } from "@rjweb/utils"
 
 export default function(router: GlobalRouter) {
 	router.get('/api/v1/stats', async({ req }) => {
-		const [ data, requests, database ] = await req.cache.use('stats::all', () => Promise.all([
+		const [ hashes, requests, builds, database ] = await req.cache.use('stats::all', () => Promise.all([
 				req.database.select({
-					builds: countDistinct(req.database.schema.buildHashes.buildId),
 					hashes: count()
 				})
 					.from(req.database.schema.buildHashes)
@@ -16,6 +15,13 @@ export default function(router: GlobalRouter) {
 				})
 					.from(req.database.schema.requests)
 					.get(),
+				req.database.select({
+					builds: count(),
+					totalJarSize: sum(req.database.schema.builds.jarSize),
+					totalZipSize: sum(req.database.schema.builds.zipSize)
+				})
+					.from(req.database.schema.builds)
+					.get(),
 				req.database.run(sql`SELECT 1`)
 			]),
 			time(30).m()
@@ -24,11 +30,14 @@ export default function(router: GlobalRouter) {
 		return Response.json({
 			success: true,
 			stats: {
-				builds: data?.builds ?? 0,
-				hashes: data?.hashes ?? 0,
+				builds: builds?.builds ?? 0,
+				hashes: hashes?.hashes ?? 0,
 				requests: requests?.requests ?? 0,
 				size: {
 					database: database?.meta.size_after ?? 0
+				}, total: {
+					jarSize: Number(builds?.totalJarSize ?? 0),
+					zipSize: Number(builds?.totalZipSize ?? 0)
 				}
 			}
 		})

@@ -2493,13 +2493,28 @@
                           }, "required": [
                             "database"
                           ]
+                        },
+                        "total": {
+                          "type": "object",
+                          "properties": {
+                            "jarSize": {
+                              "type": "integer"
+                            },
+                            "zipSize": {
+                              "type": "integer"
+                            }
+                          }, "required": [
+                            "jarSize",
+                            "zipSize"
+                          ]
                         }
                       },
                       "required": [
                         "builds",
                         "hashes",
                         "requests",
-                        "size"
+                        "size",
+                        "total"
                       ]
                     }
                   },
