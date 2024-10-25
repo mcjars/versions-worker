@@ -1465,7 +1465,7 @@
         ]
       }
     },
-    "/api/v2/shares/versions": {
+    "/api/v2/lookups/versions": {
       "get": {
         "responses": {
           "200": {
@@ -1507,10 +1507,87 @@
             }
           }
         },
-        "description": "Get Shares of all Versions for all Projects for all Lookup Requests"
+        "description": "Get lookups of all Versions for all Projects for all Lookup Requests"
       }
     },
-    "/api/v2/shares/versions/{type}": {
+    "/api/v2/lookups/versions/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "versions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "uniqueIps": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "day",
+                            "total",
+                            "uniqueIps"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "versions"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": "Get lookups of all Versions for all Projects for all Lookup Requests",
+        "parameters": [
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/lookups/versions/{type}": {
       "get": {
         "responses": {
           "200": {
@@ -1562,7 +1639,7 @@
             }
           }
         },
-        "description": "Get Shares of all Versions for a Project for all Lookup Requests",
+        "description": "Get lookups of all Versions for a Project for all Lookup Requests",
         "parameters": [
           {
             "description": "Project Type",
@@ -1576,7 +1653,100 @@
         ]
       }
     },
-    "/api/v2/shares/types": {
+    "/api/v2/lookups/versions/{type}/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "versions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "day": {
+                            "type": "integer"
+                          },
+                          "total": {
+                            "type": "integer"
+                          },
+                          "uniqueIps": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "day",
+                          "total",
+                          "uniqueIps"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "versions"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get lookups of all Versions for a Project for all Lookup Requests",
+        "parameters": [
+          {
+            "description": "Project Type",
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/types"
+            }
+          },
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
+      }
+    },
+    "/api/v2/lookups/types": {
       "get": {
         "responses": {
           "200": {
@@ -1618,7 +1788,84 @@
             }
           }
         },
-        "description": "Get Shares of all Projects for all Versions for all Lookup Requests"
+        "description": "Get lookups of all Projects for all Versions for all Lookup Requests"
+      }
+    },
+    "/api/v2/lookups/types/history/{year}/{month}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "const": true
+                    },
+                    "types": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day": {
+                              "type": "integer"
+                            },
+                            "total": {
+                              "type": "integer"
+                            },
+                            "uniqueIps": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "day",
+                            "total",
+                            "uniqueIps"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "types"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": "Get lookups of all Projects for all Versions for all Lookup Requests",
+        "parameters": [
+          {
+            "description": "Year",
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024,
+              "min": 2024
+            }
+          },
+          {
+            "description": "Month",
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1,
+              "min": 1,
+              "max": 12
+            }
+          }
+        ]
       }
     },
     "/api/v2/stats/version/{version}": {

@@ -5,7 +5,7 @@ import configRouter from "./config"
 import statsRouter from "./stats"
 import requestsRouter from "./requests"
 import buildsRouter from "./builds"
-import sharesRouter from "./shares"
+import sharesRouter from "./lookups"
 
 export default function(router: GlobalRouter) {
 	buildRouter(router)
