@@ -24,7 +24,7 @@ export default function(router: GlobalRouter) {
 					.get(),
 				req.database.run(sql`SELECT 1`)
 			]),
-			time(30).m()
+			time(1).h()
 		)
 
 		return Response.json({

@@ -25,7 +25,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`x.version`)
 				.orderBy(desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -71,7 +71,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`day`, sql`x.version`)
 				.orderBy(asc(sql`day`), desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -118,7 +118,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`x.version`)
 				.orderBy(desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -170,7 +170,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`day`, sql`x.version`)
 				.orderBy(asc(sql`day`), desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -211,7 +211,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`x.type`)
 				.orderBy(desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -257,7 +257,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`day`, sql`x.type`)
 				.orderBy(asc(sql`day`), desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({

@@ -23,7 +23,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`type`)
 				.orderBy(desc(sql`total`))
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		if (!requests?.length) return Response.json({ success: false, errors: ['Version not found'] }, { status: 404 })
@@ -67,7 +67,7 @@ export default function(router: GlobalRouter) {
 				.groupBy(sql`type, day`)
 				.orderBy(sql`day`)
 				.all(),
-			time(30).m()
+			time(3).h()
 		)
 
 		return Response.json({
@@ -139,7 +139,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.projectVersions)
 					.where(eq(req.database.schema.projectVersions.type, type))
 					.all(),
-				time(1).h()
+				time(3).h()
 			)
 		])
 
@@ -225,7 +225,7 @@ export default function(router: GlobalRouter) {
 					.from(req.database.schema.projectVersions)
 					.where(eq(req.database.schema.projectVersions.type, type))
 					.all(),
-				time(1).h()
+				time(3).h()
 			)
 		])
 
