@@ -1,4 +1,4 @@
-import { count, sql, sum } from "drizzle-orm"
+import { count, sql, sum, sumDistinct } from "drizzle-orm"
 import { GlobalRouter } from "../.."
 import { time } from "@rjweb/utils"
 
@@ -17,7 +17,7 @@ export default function(router: GlobalRouter) {
 					.get(),
 				req.database.select({
 					builds: count(),
-					totalJarSize: sum(req.database.schema.builds.jarSize),
+					totalJarSize: sumDistinct(req.database.schema.builds.jarSize),
 					totalZipSize: sum(req.database.schema.builds.zipSize)
 				})
 					.from(req.database.schema.builds)
