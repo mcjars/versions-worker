@@ -1,4 +1,4 @@
-import { and, avg, count, eq, gte, lte, sql, sum } from "drizzle-orm"
+import { and, avg, count, eq, gte, lte, sql, sum, sumDistinct } from "drizzle-orm"
 import { GlobalRouter } from "../.."
 import { types, ServerType } from "../../schema"
 import { time } from "@rjweb/utils"
@@ -10,7 +10,7 @@ export default function(router: GlobalRouter) {
 		const stats = await req.cache.use(`stats::version::${version}`, () => req.database.select({
 				builds: count(),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
@@ -57,7 +57,7 @@ export default function(router: GlobalRouter) {
 				builds: count(),
 				day: sql`strftime('%Y-%m-%d', datetime(created, 'unixepoch'))`.as('day'),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
@@ -105,7 +105,7 @@ export default function(router: GlobalRouter) {
 		const stats = await req.cache.use(`stats::${type}`, () => req.database.select({
 				builds: count(),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
@@ -152,7 +152,7 @@ export default function(router: GlobalRouter) {
 				builds: count(),
 				day: sql`strftime('%Y-%m-%d', datetime(created, 'unixepoch'))`.as('day'),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
@@ -204,7 +204,7 @@ export default function(router: GlobalRouter) {
 		const stats = await req.cache.use(`stats::${type}::${version}`, () => req.database.select({
 				builds: count(),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
@@ -260,7 +260,7 @@ export default function(router: GlobalRouter) {
 				builds: count(),
 				day: sql`strftime('%Y-%m-%d', datetime(created, 'unixepoch'))`.as('day'),
 				total: {
-					jar: sum(req.database.schema.builds.jarSize),
+					jar: sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
