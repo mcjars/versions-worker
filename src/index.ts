@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm"
 
 import apiRouter from "./api/routes"
 
+import updateCache from "./schedules/update-cache"
+
 const router = new Router<Env & { data: Record<string, any> }, {}, {
 	database: ReturnType<typeof db>
 	cache: ReturnType<typeof ch>
@@ -20,25 +22,25 @@ router.get('/', ({ env }) => {
 	return new Response(`
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <script defer data-domain="versions.mcjars.app" src="https://cat.rjns.dev/js/script.js"></script>
-    <link rel="icon" type="image/png" href="${env.S3_URL}/icons/vanilla.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="darkreader-lock" />
-    <title>MCJars API Docs</title>
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="MCJars">
-    <meta property="og:url" content="https://mcjars.app">
-    <meta property="og:image" content="${env.S3_URL}/icons/vanilla.png">
-    <meta property="og:description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
-    <meta name="description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
-    <meta name="keywords" content="minecraft, server, jar, download, lookup, reverse, lookup, mcjars, site">
-  </head>
-  <body>
-    <script id="api-reference" data-url="/openapi.json"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<script defer data-domain="versions.mcjars.app" src="https://cat.rjns.dev/js/script.js"></script>
+		<link rel="icon" type="image/png" href="${env.S3_URL}/icons/vanilla.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="darkreader-lock" />
+		<title>MCJars API Docs</title>
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="MCJars">
+		<meta property="og:url" content="https://mcjars.app">
+		<meta property="og:image" content="${env.S3_URL}/icons/vanilla.png">
+		<meta property="og:description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
+		<meta name="description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
+		<meta name="keywords" content="minecraft, server, jar, download, lookup, reverse, lookup, mcjars, site">
+	</head>
+	<body>
+		<script id="api-reference" data-url="/openapi.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+	</body>
 </html>
 	`.trim(), {
 		headers: {
@@ -191,5 +193,9 @@ export default {
 		}
 
 		return response
+	},
+
+	async scheduled(event, env, ctx) {
+		await updateCache([event, env, ctx])
 	}
 } satisfies ExportedHandler<Env>

@@ -19,3 +19,6 @@ id = "xxxxx"
 
 [placement]
 mode = "smart"
+
+[triggers]
+crons = ["0 * * * *"]
