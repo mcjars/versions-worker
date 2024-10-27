@@ -13,8 +13,4 @@ export default function(router: GlobalRouter) {
 	router.get('/openapi.json', () => {
 		return Response.json(openApi)
 	})
-
-	router.get('/robots.txt', () => {
-		return new Response('User-agent: *\nDisallow: /api')
-	})
 }
