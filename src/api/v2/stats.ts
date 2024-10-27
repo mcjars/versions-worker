@@ -105,7 +105,7 @@ export default function(router: GlobalRouter) {
 		const stats = await req.cache.use(`stats::${type}`, () => req.database.select({
 				builds: count(),
 				total: {
-					jar: sumDistinct(req.database.schema.builds.jarSize),
+					jar: type === 'FABRIC' ? sum(req.database.schema.builds.jarSize) : sumDistinct(req.database.schema.builds.jarSize),
 					zip: sum(req.database.schema.builds.zipSize)
 				}, average: {
 					jar: avg(req.database.schema.builds.jarSize),
