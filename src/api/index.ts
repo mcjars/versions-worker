@@ -275,3 +275,4 @@ server.start()
 	})
 
 require('@/globals/openapi')
+require('@/api/routes/download')
