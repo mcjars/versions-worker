@@ -385,6 +385,7 @@ const versionsVelocity = db.select()
 			.as('x')
 	)
 	.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+	.orderBy(asc(sql`x."createdOldest"`))
 	.prepare('versions_velocity')
 
 export default Object.assign(db, {
