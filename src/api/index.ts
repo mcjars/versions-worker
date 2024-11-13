@@ -81,7 +81,8 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 				ctr.client.ip,
 				ctr.client.origin,
 				ctr.client.userAgent,
-				ctr["@"].organization?.id ?? null
+				ctr["@"].organization?.id ?? null,
+				ctr["@"].data
 			)
 	
 			ctr.headers.set('X-Request-ID', ctr["@"].request.id)

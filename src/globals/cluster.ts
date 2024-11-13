@@ -16,9 +16,9 @@ export type Request = {
 	status: number
 	body: Record<string, any> | null
 	ip: string
-	continent?: string
-	country?: string
-	data?: Record<string, any>
+	continent: string | null
+	country: string | null
+	data: Record<string, any> | null
 	userAgent: string
 	created: Date
 }
@@ -29,7 +29,7 @@ const pending: Request[] = [],
 /**
  * Log a new request
  * @since 1.18.0
-*/ export function log(method: schema.Method, route: string | RegExp, body: JSONParsed | null, ip: network.IPAddress, origin: string, userAgent: string, organization: number | null): Request {
+*/ export function log(method: schema.Method, route: string | RegExp, body: JSONParsed | null, ip: network.IPAddress, origin: string, userAgent: string, organization: number | null, data: Record<string, any> | null): Request {
 	const request: Request = {
 		id: string.generate({ length: 12 }),
 		organizationId: organization ?? null,
@@ -41,6 +41,9 @@ const pending: Request[] = [],
 		status: 0,
 		body: typeof body === 'object' ? body : null,
 		ip: ip.usual(),
+		continent: null,
+		country: null,
+		data,
 		userAgent,
 		created: new Date()
 	}

@@ -26,7 +26,7 @@ FROM node:20-bookworm-slim as runner
 LABEL author="Robert Jansen" maintainer="rjansengd@gmail.com"
 
 RUN apt update && \
-    apt install -y git bash openjdk-17-jdk-headless
+    apt install -y git bash
 
 COPY --from=builder-server /app/server/node_modules /app/server/node_modules
 COPY --from=builder-server /app/server/lib /app/server/lib
