@@ -28,7 +28,7 @@ export = new clusterAPIRouter.Path('/')
 			if (!data.success) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: data.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`) })
 
 			await ctr["@"].database.insert(ctr["@"].database.schema.requests)
-				.values(data.data.requests)
+				.values(data.data.requests).catch(() => null)
 
 			return ctr.print({ success: true })
 		})
