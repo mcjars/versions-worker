@@ -2,7 +2,6 @@ import { server } from "@/api"
 
 const blacklistedHeaders = [
 	'content-encoding',
-	'content-type',
 	'transfer-encoding',
 	'connection'
 ]
@@ -33,16 +32,7 @@ server.path('/download', (path) => path
 
 			response.headers.forEach((value, key) => blacklistedHeaders.includes(key) || ctr.headers.set(key, value))
 
-			return ctr.status(response.status).printChunked(async(print) => {
-				const reader = response.body!.getReader()
-
-				while (true) {
-					const { done, value } = await reader.read()
-					if (done) break
-
-					await print(value)
-				}
-			})
+			return ctr.status(response.status).print(await response.arrayBuffer())
 		})
 	)
 	.http('GET', '/leaves/{version}/{build}/{file}', (http) => http
