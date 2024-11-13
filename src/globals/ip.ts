@@ -22,7 +22,8 @@ export async function lookup(ips: string[]): Promise<Lookup[]> {
 
 	if (!data.ok) throw new Error(await data.text())
 
-	return data.json().then((json) => json.map((entry: { continentCode: string, countryCode: string }) => ({
+	return data.json().then((json) => json.map((entry: any) => ({
+		query: entry.query,
 		continent: entry.continentCode,
 		country: entry.countryCode
 	})))

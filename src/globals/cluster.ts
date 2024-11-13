@@ -72,9 +72,7 @@ const process = async(): Promise<void> => {
 	try {
 		const ips = await lookup(requests.map((r) => r.ip)).catch(() => null)
 
-		for (let i = 0; i < requests.length; i++) {
-			const request = requests[i]
-
+		for (const request of requests) {
 			const ip = ips?.find((ip) => ip.query === request.ip)
 			if (ip) {
 				request.continent = ip.continent
