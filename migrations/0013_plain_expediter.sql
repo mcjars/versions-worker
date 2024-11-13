@@ -1,1 +1,0 @@
-CREATE INDEX `requests_path_idx` ON `requests` (`path`);

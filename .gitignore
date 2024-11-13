@@ -1,4 +1,4 @@
-.wrangler/
+lib/
 node_modules/
+.env
 drizzle.config.json
-wrangler.toml

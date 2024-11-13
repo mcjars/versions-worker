@@ -1,9 +1,20 @@
-import { drizzle } from "drizzle-orm/d1"
-import * as schema from "../schema"
+import { drizzle } from "drizzle-orm/node-postgres"
+import * as schema from "@/schema"
 import { time } from "@rjweb/utils"
-import { and, asc, count, countDistinct, eq, like, max, min, sql } from "drizzle-orm"
+import { and, asc, count, countDistinct, desc, eq, inArray, like, max, min, sql } from "drizzle-orm"
+import env from "@/globals/env"
+import cache from "@/globals/cache"
 import yaml from "js-yaml"
-import cache from "./cache"
+import logger from "@/globals/logger"
+import { Pool } from "pg"
+
+export type ReturnRow = RawBuild & {
+	build_count: string
+	version_type: string | null
+	version_java: string | null
+	version_supported: boolean | null
+	version_created: string | null
+}
 
 const compatibility = [
 	'spigot', 'paper', 'folia', 'purpur',
@@ -300,7 +311,7 @@ export type RawBuild = {
 	version_id: string | null
 	project_version_id: string | null
 	build_number: number
-	experimental: number
+	experimental: boolean
 
 	jar_url: string | null
 	jar_size: number | null
@@ -308,359 +319,371 @@ export type RawBuild = {
 	zip_url: string | null
 	zip_size: number | null
 	
-	installation: string
-	changes: string
+	installation: schema.InstallStep[][]
+	changes: string[]
 
-	created: number
+	created: string | null
 }
 
-export default function database(env: Env) {
-	const db = drizzle(env.DB, { schema })
+const pool = new Pool({
+	connectionString: env.DATABASE_URL
+})
 
-	return Object.assign(db, {
-		schema,
+const db = drizzle(pool, { schema }),
+	startTime = performance.now()
 
-		prepare: {
-			build<Data extends Record<string, any> | null | undefined>(raw: Data): Data extends null ? null : Data extends undefined ? null : Data {
-				if (!raw) return null as any
+db.$client.connect().then(() => {
+	logger()
+		.text('Database', (c) => c.cyan)
+		.text('Connection established!')
+		.text(`(${(performance.now() - startTime).toFixed(1)}ms)`, (c) => c.gray)
+		.info()
+})
 
-				return {
-					id: raw.id,
-					type: raw.type,
+const versionsAll = db.select()
+	.from(
+		db.select({
+			java: schema.minecraftVersions.java,
+			created: schema.minecraftVersions.created,
+			supported: schema.minecraftVersions.supported,
+			versionType: schema.minecraftVersions.type,
+			builds: count(schema.builds.id).as('builds'),
+			latest: max(schema.builds.id).as('latest')
+		})
+			.from(schema.minecraftVersions)
+			.innerJoin(schema.builds, and(
+				eq(schema.builds.versionId, schema.minecraftVersions.id),
+				eq(schema.builds.type, sql.placeholder('type'))
+			))
+			.groupBy(
+				schema.minecraftVersions.id,
+				schema.minecraftVersions.created,
+				schema.minecraftVersions.supported,
+				schema.minecraftVersions.java,
+				schema.minecraftVersions.type
+			)
+			.orderBy(asc(schema.minecraftVersions.created))
+			.as('x')
+	)
+	.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+	.prepare('versions_all')
 
-					versionId: raw.versionId,
-					projectVersionId: raw.projectVersionId,
-					buildNumber: raw.buildNumber,
-					name: raw.buildNumber === 1 ? raw.projectVersionId ?? `#${raw.buildNumber}` : `#${raw.buildNumber}`,
-					experimental: raw.experimental,
+const versionsVelocity = db.select()
+	.from(
+		db.select({
+			builds: count(schema.builds.id).as('builds'),
+			latest: max(schema.builds.id).as('latest'),
+			createdOldest: min(schema.builds.created).as('createdOldest'),
+			projectVersionId: schema.projectVersions.id
+		})
+			.from(schema.projectVersions)
+			.innerJoin(schema.builds, and(
+				eq(schema.builds.projectVersionId, schema.projectVersions.id),
+				eq(schema.builds.type, 'VELOCITY')
+			))
+			.groupBy(schema.projectVersions.id)
+			.as('x')
+	)
+	.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
+	.prepare('versions_velocity')
 
-					jarUrl: raw.jarUrl,
-					jarSize: raw.jarSize,
-					jarLocation: raw.jarLocation,
-					zipUrl: raw.zipUrl,
-					zipSize: raw.zipSize,
+export default Object.assign(db, {
+	schema,
 
-					installation: raw.installation,
-					changes: raw.changes,
+	prepare: {
+		build<Data extends Record<string, any> | null | undefined>(raw: Data): Data extends null ? null : Data extends undefined ? null : Data {
+			if (!raw) return null as any
 
-					created: raw.created,
-				} as any
-			},
+			return {
+				id: raw.id,
+				type: raw.type,
 
-			rawBuild<Data extends RawBuild>(build: Data): Data extends null ? null : Data extends undefined ? null : Data {
-				if (!build) return null as any
+				versionId: raw.versionId,
+				projectVersionId: raw.projectVersionId,
+				buildNumber: raw.buildNumber,
+				name: raw.buildNumber === 1 ? raw.projectVersionId ?? `#${raw.buildNumber}` : `#${raw.buildNumber}`,
+				experimental: raw.experimental,
 
-				return {
-					id: build.id,
-					type: build.type,
+				jarUrl: raw.jarUrl,
+				jarSize: raw.jarSize,
+				jarLocation: raw.jarLocation,
+				zipUrl: raw.zipUrl,
+				zipSize: raw.zipSize,
 
-					versionId: build.version_id,
-					projectVersionId: build.project_version_id,
-					buildNumber: build.build_number,
-					name: build.build_number === 1 ? build.project_version_id ?? `#${build.build_number}` : `#${build.build_number}`,
-					experimental: Boolean(build.experimental),
+				installation: raw.installation,
+				changes: raw.changes,
 
-					jarUrl: build.jar_url,
-					jarSize: build.jar_size,
-					jarLocation: build.jar_location,
-					zipUrl: build.zip_url,
-					zipSize: build.zip_size,
-
-					installation: JSON.parse(build.installation),
-					changes: JSON.parse(build.changes),
-
-					created: build.created ? new Date(build.created * 1000) : null
-				} as any
-			}
+				created: raw.created,
+			} as any
 		},
 
-		fields: {
-			build: {
-				id: schema.builds.id,
-				type: schema.builds.type,
+		rawBuild<Data extends RawBuild>(build: Data): Data extends null ? null : Data extends undefined ? null : Data {
+			if (!build) return null as any
 
-				versionId: schema.builds.versionId,
-				projectVersionId: schema.builds.projectVersionId,
-				buildNumber: schema.builds.buildNumber,
-				experimental: schema.builds.experimental,
+			return {
+				id: build.id,
+				type: build.type,
 
-				jarUrl: schema.builds.jarUrl,
-				jarSize: schema.builds.jarSize,
-				jarLocation: schema.builds.jarLocation,
-				zipUrl: schema.builds.zipUrl,
-				zipSize: schema.builds.zipSize,
+				versionId: build.version_id,
+				projectVersionId: build.project_version_id,
+				buildNumber: build.build_number,
+				name: build.build_number === 1 ? build.project_version_id ?? `#${build.build_number}` : `#${build.build_number}`,
+				experimental: build.experimental,
 
-				installation: schema.builds.installation,
-				changes: schema.builds.changes,
+				jarUrl: build.jar_url,
+				jarSize: build.jar_size,
+				jarLocation: build.jar_location,
+				zipUrl: build.zip_url,
+				zipSize: build.zip_size,
 
-				created: schema.builds.created
-			} as const
-		},
+				installation: build.installation,
+				changes: build.changes,
 
-		formatConfig(file: string, rawValue: string) {
-			let value = ''
-	
-			for (const line of rawValue.split('\n')) {
-				if (line.startsWith('#')) continue
-				value += line + '\n'
-			}
-	
-			if (file.endsWith('.properties')) {
-				value = value.split('\n')
-					.sort((a, b) => a.split('=')[0].localeCompare(b.split('=')[0]))
-					.join('\n')
-			} else if (file.endsWith('.yml') || file.endsWith('.yaml')) {
-				value = yaml.dump(yaml.load(value), { sortKeys: true })
-			}
-	
-			if (file === 'velocity.toml') {
-				value = value
-					.replace(/forwarding-secret = "(.*)"/, 'forwarding-secret="xxx"')
-			}
-	
-			if (file === 'config.yml') {
-				value = value
-					.replace(/stats_uuid: (.*)/, 'stats_uuid: xxx')
-					.replace(/stats: (.*)/, 'stats: xxx')
-			}
-	
-			if (file === 'leaves.yml') {
-				value = value
-					.replace(/server-id: (.*)/, 'server-id: xxx')
-			}
-	
-			value = value.trim()
-				.replace(/seed-(.*)=(.*)/g, 'seed-$1=xxx')
-				.replace(/seed-(.*): (.*)/g, 'seed-$1: xxx')
-	
-			return value
-		},
+				created: build.created ? new Date(build.created) : null
+			} as any
+		}
+	},
 
-		async searchConfig(name: string, config: string, format: schema.Format, matches: number) {
-			const file = Object.keys(configs).find((file) => file.endsWith(name))
-			if (!file) return []
+	fields: {
+		build: {
+			id: schema.builds.id,
+			type: schema.builds.type,
 
-			let contains: string | null = null
+			versionId: schema.builds.versionId,
+			projectVersionId: schema.builds.projectVersionId,
+			buildNumber: schema.builds.buildNumber,
+			experimental: schema.builds.experimental,
 
-			switch (format) {
-				case "YAML": {
-					if (!contains) {
-						const configVersion = config.match(/config-version:\s*(.+)/)?.[1]
-						if (configVersion) contains = `config-version: ${configVersion}`
-					}
+			jarUrl: schema.builds.jarUrl,
+			jarSize: schema.builds.jarSize,
+			jarLocation: schema.builds.jarLocation,
+			zipUrl: schema.builds.zipUrl,
+			zipSize: schema.builds.zipSize,
 
-					if (!contains) {
-						const configVersion = config.match(/version:\s*(.+)/)?.[1]
-						if (configVersion) contains = `version: ${configVersion}`
-					}
+			installation: schema.builds.installation,
+			changes: schema.builds.changes,
 
-					break
+			created: schema.builds.created
+		} as const
+	},
+
+	formatConfig(file: string, rawValue: string) {
+		let value = ''
+
+		for (const line of rawValue.split('\n')) {
+			if (line.startsWith('#')) continue
+			value += line + '\n'
+		}
+
+		if (file.endsWith('.properties')) {
+			value = value.split('\n')
+				.sort((a, b) => a.split('=')[0].localeCompare(b.split('=')[0]))
+				.join('\n')
+		} else if (file.endsWith('.yml') || file.endsWith('.yaml')) {
+			value = yaml.dump(yaml.load(value), { sortKeys: true })
+		}
+
+		if (file === 'velocity.toml') {
+			value = value
+				.replace(/forwarding-secret = "(.*)"/, 'forwarding-secret="xxx"')
+		}
+
+		if (file === 'config.yml') {
+			value = value
+				.replace(/stats_uuid: (.*)/, 'stats_uuid: xxx')
+				.replace(/stats: (.*)/, 'stats: xxx')
+		}
+
+		if (file === 'leaves.yml') {
+			value = value
+				.replace(/server-id: (.*)/, 'server-id: xxx')
+		}
+
+		value = value.trim()
+			.replace(/seed-(.*)=(.*)/g, 'seed-$1=xxx')
+			.replace(/seed-(.*): (.*)/g, 'seed-$1: xxx')
+
+		return value
+	},
+
+	async searchConfig(name: string, config: string, format: schema.Format, matches: number) {
+		const file = Object.keys(configs).find((file) => file.endsWith(name))
+		if (!file) return []
+
+		let contains: string | null = null
+
+		switch (format) {
+			case "YAML": {
+				if (!contains) {
+					const configVersion = config.match(/config-version:\s*(.+)/)?.[1]
+					if (configVersion) contains = `config-version: ${configVersion}`
 				}
 
-				case "TOML": {
-					if (!contains) {
-						const configVersion = config.match(/config-version\s*=\s*(.+)/)?.[1]
-						if (configVersion) contains = `config-version = ${configVersion}`
-					}
-
-					break
+				if (!contains) {
+					const configVersion = config.match(/version:\s*(.+)/)?.[1]
+					if (configVersion) contains = `version: ${configVersion}`
 				}
+
+				break
 			}
 
-			if (!contains) return []
-			// old prisma postgres code, not sure how to convert to drizzle with d1 yet
-			/*if (!contains) {
-				const query = await database.$queryRaw<{ id: string }[]>`
-					SELECT cv.id FROM "minecraftServerConfigValues" cv
-					JOIN "minecraftServerConfigs" c ON cv."configId" = c.id
-					WHERE
-						c."type" = ${configs[file].type}::"MinecraftServerType" AND
-						c."format" = ${format}::"Format"
-					ORDER BY SIMILARITY("value", ${config}) DESC
-					LIMIT 3
-				`
+			case "TOML": {
+				if (!contains) {
+					const configVersion = config.match(/config-version\s*=\s*(.+)/)?.[1]
+					if (configVersion) contains = `config-version = ${configVersion}`
+				}
 
-				return database.minecraftServerConfigValue.findMany({
-					where: {
-						id: {
-							in: query.map((c) => c.id)
-						}
-					}, select: {
-						builds: {
-							select: {
-								build: {
-									select
-								}
-							}, where: {
-								build: {
-									type: configs[file].type
-								}
-							}, take: 1,
-							orderBy: {
-								buildId: 'asc'
-							}
-						}, config: {
-							select: {
-								type: true
-							}
-						}, value: true
-					}
-				})
-			}*/
+				break
+			}
+		}
 
-			return db.select()
-				.from(schema.buildConfigs)
-				.innerJoin(schema.configValues, eq(schema.configValues.id, schema.buildConfigs.configValueId))
+		if (!contains) {
+			const query = await db.select({
+				id: schema.configValues.id,
+				similarity: sql`SIMILARITY(${schema.configValues.value}, ${config})`.as('similarity')
+			})
+				.from(schema.configValues)
 				.innerJoin(schema.configs, eq(schema.configs.id, schema.configValues.configId))
 				.where(and(
 					eq(schema.configs.type, configs[file].type),
-					eq(schema.configs.format, format),
-					like(schema.configValues.value, `%${contains}%`)
+					eq(schema.configs.format, format)
 				))
-				.innerJoin(schema.builds, eq(schema.builds.id, schema.buildConfigs.buildId))
-				.groupBy(schema.configValues.id)
-				.limit(matches)
-				.all()
-		},
+				.orderBy(desc(sql`similarity`))
+				.limit(3)
 
-		async versions(type: schema.ServerType) {
-			switch (type) {
-				case "VELOCITY": {
-					const versions = await cache(env).use('builds::VELOCITY', async() => {
-						const versions = await db.select()
-							.from(
-								db.select({
-									builds: count(schema.builds.id).as('builds'),
-									latest: max(schema.builds.id).as('latest'),
-									createdOldest: min(schema.builds.created).as('createdOldest'),
-									projectVersionId: schema.projectVersions.id
-								})
-									.from(schema.projectVersions)
-									.innerJoin(schema.builds, and(
-										eq(schema.builds.projectVersionId, schema.projectVersions.id),
-										eq(schema.builds.type, type)
-									))
-									.groupBy(schema.projectVersions.id)
-									.as('x')
-							)
-							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
-							.all()
-	
-						return Object.fromEntries(versions.map((version, i) => [
-							version.x.projectVersionId,
-							{
-								type: 'RELEASE',
-								supported: i === versions.length - 1,
-								java: 21,
-								created: version.x.createdOldest,
-								builds: Number(version.x.builds),
-								latest: this.prepare.build(version.builds)
-							}
-						]))
-					}, time(30).m())
-	
-					return versions
-				}
-	
-				default: {
-					const versions = await cache(env).use(`builds::${type}`, async() => {
-						const versions = await db.select()
-							.from(
-								db.select({
-									java: schema.minecraftVersions.java,
-									created: schema.minecraftVersions.created,
-									supported: schema.minecraftVersions.supported,
-									versionType: schema.minecraftVersions.type,
-									builds: count(schema.builds.id).as('builds'),
-									latest: max(schema.builds.id).as('latest')
-								})
-									.from(schema.minecraftVersions)
-									.innerJoin(schema.builds, and(
-										eq(schema.builds.versionId, schema.minecraftVersions.id),
-										eq(schema.builds.type, type)
-									))
-									.groupBy(
-										schema.minecraftVersions.id,
-										schema.minecraftVersions.created,
-										schema.minecraftVersions.supported,
-										schema.minecraftVersions.java,
-										schema.minecraftVersions.type
-									)
-									.orderBy(asc(schema.minecraftVersions.created))
-									.as('x')
-							)
-							.innerJoin(schema.builds, eq(schema.builds.id, sql`x.latest`))
-							.all()
-	
-						return Object.fromEntries(versions.map((version) => [
-							version.builds.versionId!,
-							{
-								type: version.x.versionType,
-								supported: version.x.supported,
-								java: version.x.java,
-								created: version.x.created,
-								builds: Number(version.x.builds),
-								latest: this.prepare.build(version.builds)
-							}
-						]))
-					}, time(30).m())
-	
-					return versions
-				}
-			}
-		},
-	
-		async version(version: string, type: schema.ServerType): Promise<'minecraft' | 'project' | null> {
-			const [ minecraft, project ] = await cache(env).use(`versionLocation::${version}::${type}`, () => Promise.all([
-				db.select({
-					_: sql`1`
-				})
-					.from(schema.minecraftVersions)
-					.where(eq(schema.minecraftVersions.id, version))
-					.limit(1)
-					.get(),
-				db.select({
-					_: sql`1`
-				})
-					.from(schema.projectVersions)
-					.where(and(
-						eq(schema.projectVersions.type, type),
-						eq(schema.projectVersions.id, version)
-					))
-					.limit(1)
-					.get()
-			]), time(30).m())
-	
-			return minecraft ? 'minecraft' : project ? 'project' : null
-		},
-	
-		async types() {
-			const response = await cache(env).use('types::all', async() => {
-				const data = await db.select({
-					type: schema.builds.type,
-					builds: count(),
-					versionsMinecraft: countDistinct(schema.builds.versionId),
-					versionsProject: countDistinct(schema.builds.projectVersionId)
-				})
-					.from(schema.builds)
-					.groupBy(schema.builds.type)
-					.all()
-		
-				return Object.fromEntries(schema.types.map((type) => [
-					type,
-					{
-						...extraTypeInfos[type],
-						icon: `${env.S3_URL}/icons/${type.toLowerCase()}.png`,
-						builds: data.find((d) => d.type === type)?.builds ?? 0,
-						versions: {
-							minecraft: data.find((d) => d.type === type)?.versionsMinecraft ?? 0,
-							project: data.find((d) => d.type === type)?.versionsProject ?? 0
-						}
-					}
-				]))
-			}, time(30).m())
-	
-			return response
+			return db.select({
+				build: this.fields.build,
+				value: schema.configValues.value,
+				similarity: sql`SIMILARITY(${schema.configValues.value}, ${config})`.as('similarity')
+			})
+				.from(schema.configValues)
+				.innerJoin(
+					schema.buildConfigs,
+					eq(schema.buildConfigs.configValueId, schema.configValues.id)
+				)
+				.innerJoin(
+					schema.builds,
+					and(
+						eq(schema.builds.id, schema.buildConfigs.buildId),
+						eq(schema.builds.type, configs[file].type)
+					)
+				)
+				.where(and(
+					inArray(schema.configValues.id, query.map((c) => c.id))
+				))
+				.orderBy(desc(sql`similarity`))
+				.limit(matches)
 		}
-	})
-}
+
+		return db.select({
+			build: this.fields.build,
+			value: schema.configValues.value
+		})
+			.from(schema.buildConfigs)
+			.innerJoin(schema.configValues, eq(schema.configValues.id, schema.buildConfigs.configValueId))
+			.innerJoin(schema.configs, eq(schema.configs.id, schema.configValues.configId))
+			.where(and(
+				eq(schema.configs.type, configs[file].type),
+				eq(schema.configs.format, format),
+				like(schema.configValues.value, `%${contains}%`)
+			))
+			.innerJoin(schema.builds, eq(schema.builds.id, schema.buildConfigs.buildId))
+			.groupBy(schema.configValues.id)
+			.limit(matches)
+	},
+
+	async versions(type: schema.ServerType) {
+		switch (type) {
+			case "VELOCITY": {
+				const versions = await cache.use('builds::VELOCITY', async() => {
+					const versions = await versionsVelocity.execute()
+
+					return Object.fromEntries(versions.map((version, i) => [
+						version.x.projectVersionId,
+						{
+							type: 'RELEASE',
+							supported: i === versions.length - 1,
+							java: 21,
+							created: version.x.createdOldest,
+							builds: Number(version.x.builds),
+							latest: this.prepare.build(version.builds)
+						}
+					]))
+				}, time(30).m())
+
+				return versions
+			}
+
+			default: {
+				const versions = await cache.use(`builds::${type}`, async() => {
+					const versions = await versionsAll.execute({ type })
+
+					return Object.fromEntries(versions.map((version) => [
+						version.builds.versionId!,
+						{
+							type: version.x.versionType,
+							supported: version.x.supported,
+							java: version.x.java,
+							created: version.x.created,
+							builds: Number(version.x.builds),
+							latest: this.prepare.build(version.builds)
+						}
+					]))
+				}, time(30).m())
+
+				return versions
+			}
+		}
+	},
+
+	async version(version: string, type: schema.ServerType): Promise<'minecraft' | 'project' | null> {
+		const [ minecraft, project ] = await cache.use(`versionLocation::${version}::${type}`, () => Promise.all([
+			db.select({
+				_: sql`1`
+			})
+				.from(schema.minecraftVersions)
+				.where(eq(schema.minecraftVersions.id, version))
+				.limit(1),
+			db.select({
+				_: sql`1`
+			})
+				.from(schema.projectVersions)
+				.where(and(
+					eq(schema.projectVersions.type, type),
+					eq(schema.projectVersions.id, version)
+				))
+				.limit(1)
+				.then((r) => r[0])
+		]), time(30).m())
+
+		return minecraft ? 'minecraft' : project ? 'project' : null
+	},
+
+	async types() {
+		const response = await cache.use('types::all', async() => {
+			const data = await db.select({
+				type: schema.builds.type,
+				builds: count(),
+				versionsMinecraft: countDistinct(schema.builds.versionId),
+				versionsProject: countDistinct(schema.builds.projectVersionId)
+			})
+				.from(schema.builds)
+				.groupBy(schema.builds.type)
+	
+			return Object.fromEntries(schema.types.map((type) => [
+				type,
+				{
+					...extraTypeInfos[type],
+					icon: `${env.S3_URL}/icons/${type.toLowerCase()}.png`,
+					builds: data.find((d) => d.type === type)?.builds ?? 0,
+					versions: {
+						minecraft: data.find((d) => d.type === type)?.versionsMinecraft ?? 0,
+						project: data.find((d) => d.type === type)?.versionsProject ?? 0
+					}
+				}
+			]))
+		}, time(30).m())
+
+		return response
+	}
+})

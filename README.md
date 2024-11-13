@@ -1,11 +1,11 @@
 # versions-worker - MCJars Minecraft Versions API
 
-mcvapi (versions-worker) is an api tool for retrieving Minecraft server versions. It allows you to easily download, install, and lookup Minecraft server versions. This is the api part that runs on Cloudflare Workers.
+mcvapi (versions-worker) is an api tool for retrieving Minecraft server versions. It allows you to easily download, install, and lookup Minecraft server versions. This is the api part that runs on 2 HA Hetzner VMs.
 
 ## Features
 
-- Runs on Cloudflare Workers for high availability
-- Fast Reverse Hash Lookup
+- Runs in Docker for high availability
+- Fast Reverse Hash Lookup (< 20ms)
 - Data is cached for fast repeated retrievals
 - Available in most regions
 
@@ -23,13 +23,13 @@ npm i -g pnpm
 pnpm i
 
 # fill out the configs
-cp wrangler.toml.example wrangler.toml
+cp .env.example .env
 cp drizzle.config.json.example drizzle.config.json
 
 # after filling out the configs
 pnpm kit migrate
 
-# start the dev server on port 6901
+# start the dev server on port 8000
 pnpm dev
 ```
 

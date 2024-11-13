@@ -1,11 +1,9 @@
 {
-  "dialect": "sqlite",
-  "driver": "d1-http",
+  "dialect": "postgresql",
+  "driver": "pglight",
   "out": "./migrations",
   "schema": "./src/schema.ts",
   "dbCredentials": {
-    "accountId": "xxxx",
-    "databaseId": "xxx-x-x-x-xxxxx",
-    "token": "xxxx_xxxxx_xxxx"
+    "url": ""
   }
 }
