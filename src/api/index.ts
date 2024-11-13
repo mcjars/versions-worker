@@ -20,6 +20,10 @@ export const server = new Server(Runtime, {
 		}
 	}, logging: {
 		debug: env.LOG_LEVEL === 'debug'
+	}, compression: {
+		http: {
+			enabled: false
+		}
 	}
 }, [
 	Cors.use({ allowAll: true })
