@@ -1,9 +1,8 @@
 {
   "dialect": "postgresql",
-  "driver": "pglight",
   "out": "./migrations",
   "schema": "./src/schema.ts",
   "dbCredentials": {
-    "url": ""
+    "url": "postgresql://postgres:password@localhost:5432/mcvapi"
   }
 }

@@ -4,6 +4,7 @@ import logger from "@/globals/logger"
 import { network, string, time } from "@rjweb/utils"
 import { JSONParsed } from "rjweb-server"
 import * as schema from "@/schema"
+import { lookup } from "@/globals/ip"
 
 export type Request = {
 	id: string
@@ -69,12 +70,24 @@ const process = async(): Promise<void> => {
 	if (!requests.length) return
 
 	try {
+		const ips = await lookup(requests.map((r) => r.ip)).catch(() => null)
+
+		for (let i = 0; i < requests.length; i++) {
+			const request = requests[i]
+
+			const ip = ips?.find((ip) => ip.query === request.ip)
+			if (ip) {
+				request.continent = ip.continent
+				request.country = ip.country
+			}
+		}
+
 		if (env.CLUSTER_REMOTE) {
 			const response = await fetch(`${env.CLUSTER_REMOTE}/api/cluster/request`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': env.CLUSTER_TOKEN!
+					'Authorization': env.CLUSTER_TOKEN
 				}, body: JSON.stringify({
 					requests
 				})

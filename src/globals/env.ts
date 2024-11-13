@@ -22,7 +22,7 @@ const infos = z.object({
 
 	CLUSTER_MAIN: z.union([ z.literal('true'), z.literal('false') ]).transform((str) => str === 'true'),
 	CLUSTER_REMOTE: z.string().optional(),
-	CLUSTER_TOKEN: z.string().optional(),
+	CLUSTER_TOKEN: z.string(),
 
 	LOG_LEVEL: z.union([ z.literal('none'), z.literal('info'), z.literal('debug') ]),
 	LOG_DIRECTORY: z.string().optional(),
