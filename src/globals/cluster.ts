@@ -91,7 +91,7 @@ const process = async(): Promise<void> => {
 				})
 			})
 
-			if (!response.ok) throw await response.text()
+			if (!response.ok && response.status !== 400) throw await response.text()
 		} else {
 			await database.insert(schema.requests)
 				.values(requests).catch(() => null)
