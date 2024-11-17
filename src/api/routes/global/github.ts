@@ -24,7 +24,7 @@ export = new globalAPIRouter.Path('/')
 				user.request('GET /user/emails').then((r) => r.data.find((email) => email.primary) ?? r.data[0])
 			])
 
-			const id = await ctr["@"].database.insert(ctr["@"].database.schema.users)
+			const id = await ctr["@"].database.write.insert(ctr["@"].database.schema.users)
 				.values({
 					githubId: data.id,
 					name: data.name,
@@ -45,7 +45,7 @@ export = new globalAPIRouter.Path('/')
 				})
 				.then((r) => r[0].id)
 
-			const session = await ctr["@"].database.insert(ctr["@"].database.schema.userSessions)
+			const session = await ctr["@"].database.write.insert(ctr["@"].database.schema.userSessions)
 				.values({
 					userId: id,
 					session: string.hash(`${id}-${Date.now()}`, { algorithm: 'sha256' })
