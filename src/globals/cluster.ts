@@ -1,4 +1,3 @@
-import env from "@/globals/env"
 import database from "@/globals/database"
 import logger from "@/globals/logger"
 import { network, string, time } from "@rjweb/utils"
@@ -80,22 +79,8 @@ const process = async(): Promise<void> => {
 			}
 		}
 
-		if (env.CLUSTER_REMOTE) {
-			const response = await fetch(`${env.CLUSTER_REMOTE}/api/cluster/request`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': env.CLUSTER_TOKEN
-				}, body: JSON.stringify({
-					requests
-				})
-			})
-
-			if (!response.ok && response.status !== 400) throw await response.text()
-		} else {
-			await database.insert(schema.requests)
-				.values(requests).catch(() => null)
-		}
+		await database.write.insert(schema.requests)
+			.values(requests).catch(() => null)
 	} catch (err) {
 		processing.push(...requests)
 		throw err

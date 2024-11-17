@@ -219,14 +219,6 @@ export const userOrganizationValidator = new server.Validator()
 		ctr["@"].organization = organization
 	})
 
-const clusterValidator = new server.Validator()
-	.httpRequest((ctr, end) => {
-		if (!env.CLUSTER_MAIN) return end(ctr.status(ctr.$status.SERVICE_UNAVAILABLE).print({ success: false, errors: ['Cluster is not available'] }))
-
-		const authorization = ctr.headers.get('authorization', '')
-		if (authorization !== env.CLUSTER_TOKEN) return end(ctr.status(ctr.$status.UNAUTHORIZED).print({ success: false, errors: ['Invalid Authorization'] }))
-	})
-
 export const globalAPIRouter = new server.FileLoader('/api')
 	.load('api/routes/global', {
 		fileBasedRouting: true
@@ -248,20 +240,13 @@ export const userAPIRouter = new server.FileLoader('/api/user')
 	.validate(userValidator.use({}))
 	.export()
 
-export const clusterAPIRouter = new server.FileLoader('/api/cluster')
-	.load('api/routes/cluster', {
-		fileBasedRouting: true
-	})
-	.validate(clusterValidator.use({}))
-	.export()
-
 server.path('/', (path) => path
 	.http('GET', '/openapi.json', (http) => http
 		.onRequest((ctr) => {
 			const openAPI = server.openAPI('MCJars Versions API', ctr["@"].appVersion, {
 				url: env.APP_URL
 			}, {
-				email: 'rjansengd@gmail.com',
+				email: 'me@rjns.dev',
 				name: 'GitHub',
 				url: 'https://github.com/mcjars'
 			})
