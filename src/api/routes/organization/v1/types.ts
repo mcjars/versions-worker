@@ -84,7 +84,9 @@ export = new organizationAPIRouter.Path('/')
 		.onRequest(async(ctr) => {
 			return ctr.print({
 				success: true,
-				types: object.pick(await ctr["@"].database.types(), ctr["@"].organization.types)
+				types: ctr["@"].organization.types.length
+					? object.pick(await ctr["@"].database.types(), ctr["@"].organization.types)
+					: await ctr["@"].database.types()
 			})
 		})
 	)
