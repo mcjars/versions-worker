@@ -21,7 +21,7 @@ export = new userAPIRouter.Path('/')
 			}
 		})
 		.onRequest(async(ctr) => {
-			await ctr["@"].database.delete(ctr["@"].database.schema.userSessions)
+			await ctr["@"].database.write.delete(ctr["@"].database.schema.userSessions)
 				.where(eq(ctr["@"].database.schema.userSessions.id, ctr["@"].user.sessionId))
 
 			ctr.cookies.delete('session')

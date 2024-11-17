@@ -106,7 +106,7 @@ export = new userAPIRouter.Path('/')
 			if (userId === ctr["@"].organization.ownerId) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: ['Cannot add the owner as a subuser'] })
 
 			try {
-				await ctr["@"].database.insert(ctr["@"].database.schema.organizationSubusers)
+				await ctr["@"].database.write.insert(ctr["@"].database.schema.organizationSubusers)
 					.values({
 						organizationId: ctr["@"].organization.id,
 						userId
@@ -158,7 +158,7 @@ export = new userAPIRouter.Path('/')
 			if (ctr["@"].organization.ownerId !== ctr["@"].user.id && userId !== ctr["@"].user.id) return ctr.status(ctr.$status.FORBIDDEN).print({ success: false, errors: ['You do not have permission to remove subusers'] })
 
 			try {
-				const count = await ctr["@"].database.delete(ctr["@"].database.schema.organizationSubusers)
+				const count = await ctr["@"].database.write.delete(ctr["@"].database.schema.organizationSubusers)
 					.where(and(
 						eq(ctr["@"].database.schema.organizationSubusers.organizationId, ctr["@"].organization.id),
 						eq(ctr["@"].database.schema.organizationSubusers.userId, userId)

@@ -16,6 +16,7 @@ const infos = z.object({
 	REDIS_URL: z.string(),
 	SENTRY_URL: z.string().optional(),
 	DATABASE_URL: z.string(),
+	DATABASE_URL_PRIMARY: z.string().optional(),
 
 	PORT: z.string().transform((str) => parseInt(str)).optional(),
 	S3_URL: z.string(),

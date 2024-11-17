@@ -147,7 +147,7 @@ const userValidator = new server.Validator()
 		if (!user) return end(ctr.status(ctr.$status.UNAUTHORIZED).print({ success: false, errors: ['Unauthorized'] }))
 		ctr["@"].user = user
 
-		await ctr["@"].database.update(ctr["@"].database.schema.userSessions)
+		await ctr["@"].database.write.update(ctr["@"].database.schema.userSessions)
 			.set({
 				lastUsed: new Date()
 			})

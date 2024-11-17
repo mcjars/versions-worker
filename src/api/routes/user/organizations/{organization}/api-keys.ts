@@ -96,7 +96,7 @@ export = new userAPIRouter.Path('/')
 
 			if (apiKeys >= 15) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: ['You have reached the maximum number of api keys'] })
 
-			const key = await ctr["@"].database.insert(ctr["@"].database.schema.organizationKeys)
+			const key = await ctr["@"].database.write.insert(ctr["@"].database.schema.organizationKeys)
 				.values({
 					organizationId: ctr["@"].organization.id,
 					name: data.data.name,
@@ -142,7 +142,7 @@ export = new userAPIRouter.Path('/')
 			if (!apiKeyId || isNaN(apiKeyId)) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: ['Invalid api key'] })
 
 			try {
-				const count = await ctr["@"].database.delete(ctr["@"].database.schema.organizationKeys)
+				const count = await ctr["@"].database.write.delete(ctr["@"].database.schema.organizationKeys)
 					.where(and(
 						eq(ctr["@"].database.schema.organizationKeys.organizationId, ctr["@"].organization.id),
 						eq(ctr["@"].database.schema.organizationKeys.id, apiKeyId)
