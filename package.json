@@ -1,6 +1,6 @@
 {
   "name": "versions-worker",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "scripts": {
     "build": "rm -rf lib && esbuild `find src \\( -name '*.ts' -o -name '*.tsx' \\)` --platform='node' --sourcemap --ignore-annotations --format='cjs' --target='es2022' --outdir='lib' && esbuild src/index.ts --platform='node' --sourcemap --ignore-annotations --format='cjs' --target='es2022' --outdir='lib' --banner:js='require(\"module-alias\").addAlias(\"@\", __dirname);'",
     "kit": "drizzle-kit",
@@ -11,22 +11,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@octokit/oauth-app": "^7.1.3",
     "@rjweb/runtime-node": "^1.1.1",
     "@rjweb/utils": "^1.12.26",
     "ansi-colors": "^4.1.3",
-    "drizzle-orm": "^0.36.1",
+    "drizzle-orm": "^0.36.3",
     "ioredis": "^5.4.1",
     "js-yaml": "^4.1.0",
     "module-alias": "^2.2.3",
     "pg": "^8.13.1",
-    "rjweb-server": "^9.8.2",
+    "rjweb-server": "^9.8.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.9.0",
     "@types/pg": "^8.11.10",
-    "drizzle-kit": "^0.28.0",
+    "drizzle-kit": "^0.28.1",
     "esbuild": "^0.24.0",
     "typescript": "^5.6.3"
   }

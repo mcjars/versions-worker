@@ -292,3 +292,49 @@ server.schema('error', {
 		'errors'
 	]
 })
+
+server.schema('user', {
+	type: 'object',
+	properties: {
+		id: {
+			type: 'number'
+		}, name: {
+			oneOf: [
+				{ type: 'string' },
+				{ type: 'null' }
+			]
+		}, email: {
+			type: 'string'
+		}, login: {
+			type: 'string'
+		}, avatar: {
+			type: 'string'
+		}
+	}, required: ['id', 'name', 'email', 'login', 'avatar']
+})
+
+server.schema('organization', {
+	type: 'object',
+	properties: {
+		id: {
+			type: 'number'
+		}, name: {
+			type: 'string'
+		}, icon: {
+			oneOf: [
+				{ type: 'string' },
+				{ type: 'null' }
+			]
+		}, types: {
+			type: 'array',
+			items: {
+				$ref: '#/components/schemas/types'
+			}
+		}, created: {
+			type: 'string',
+			format: 'date-time'
+		}, owner: {
+			$ref: '#/components/schemas/user'
+		}
+	}, required: ['id', 'name', 'types', 'owner']
+})

@@ -1,13 +1,15 @@
-import { Server, version as Version, Cors } from "rjweb-server"
+import { Server, version as Version, Cors, Cookie } from "rjweb-server"
 import getVersion from "@/index"
 import logger from "@/globals/logger"
 import database from "@/globals/database"
 import env from "@/globals/env"
 import cache from "@/globals/cache"
+import github from "@/globals/github"
 import { Runtime } from "@rjweb/runtime-node"
 import * as cluster from "@/globals/cluster"
 import { ServerType, types } from "@/schema"
-import { eq } from "drizzle-orm"
+import { and, eq, or } from "drizzle-orm"
+import { time } from "@rjweb/utils"
 
 const startTime = performance.now()
 
@@ -26,13 +28,21 @@ export const server = new Server(Runtime, {
 		}
 	}
 }, [
-	Cors.use({ allowAll: true })
+	Cors.use({
+		credentials: true,
+		allowAll: false,
+		origins: [env.APP_FRONTEND_URL, '*'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+		headers: ['Authorization', 'Content-Type', 'Accept'],
+		exposeHeaders: ['Authorization', 'Content-Type', 'Accept']
+	})
 ], {
 	appVersion: getVersion(),
 	database,
 	logger,
 	env,
 	cache,
+	github,
 	data: {} as Record<string, any>,
 	join(...strings: (string | number | undefined | null | boolean)[]): string {
 		return strings.filter((str) => str === '' || Boolean(str)).join('\n')
@@ -44,8 +54,9 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 		organization: {
 			id: number
 			name: string
-			icon: string
+			icon: string | null
 			types: ServerType[]
+			created: Date
 		}
 
 		request: cluster.Request | null
@@ -59,7 +70,8 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 				id: ctr["@"].database.schema.organizations.id,
 				name: ctr["@"].database.schema.organizations.name,
 				icon: ctr["@"].database.schema.organizations.icon,
-				types: ctr["@"].database.schema.organizations.types
+				types: ctr["@"].database.schema.organizations.types,
+				created: ctr["@"].database.schema.organizations.created
 			})
 				.from(ctr["@"].database.schema.organizationKeys)
 				.innerJoin(ctr["@"].database.schema.organizations, eq(ctr["@"].database.schema.organizationKeys.organizationId, ctr["@"].database.schema.organizations.id))
@@ -77,7 +89,7 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 		}
 	})
 	.httpRequest(async(ctr) => {
-		if (ctr.url.path.startsWith('/api') && ctr.context.route?.type === 'http' && ctr.url.method !== 'OPTIONS' && ctr.url.method !== 'HEAD' && ctr.url.method !== 'TRACE' && ctr.url.method !== 'CONNECT') {
+		if (ctr.url.path.startsWith('/api') && !ctr.url.path.includes('github') && ctr.context.route?.type === 'http' && ctr.url.method !== 'OPTIONS' && ctr.url.method !== 'HEAD' && ctr.url.method !== 'TRACE' && ctr.url.method !== 'CONNECT') {
 			ctr["@"].request = cluster.log(
 				ctr.url.method,
 				ctr.url.href,
@@ -100,6 +112,113 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 		}
 	})
 
+const userValidator = new server.Validator()
+	.context<{
+		user: {
+			id: number
+			githubId: number
+			name: string | null
+			email: string
+			login: string
+
+			sessionId: number
+		}
+	}>()
+	.httpRequest(async(ctr, end) => {
+		const session = ctr.cookies.get('session')
+		if (!session) return end(ctr.status(ctr.$status.UNAUTHORIZED).print({ success: false, errors: ['Unauthorized'] }))
+
+		const user = await ctr["@"].cache.use(`session::${session}`, () => ctr["@"].database.select({
+				id: ctr["@"].database.schema.users.id,
+				githubId: ctr["@"].database.schema.users.githubId,
+				name: ctr["@"].database.schema.users.name,
+				email: ctr["@"].database.schema.users.email,
+				login: ctr["@"].database.schema.users.login,
+
+				sessionId: ctr["@"].database.schema.userSessions.id
+			})
+				.from(ctr["@"].database.schema.userSessions)
+				.innerJoin(ctr["@"].database.schema.users, eq(ctr["@"].database.schema.userSessions.userId, ctr["@"].database.schema.users.id))
+				.where(eq(ctr["@"].database.schema.userSessions.session, session))
+				.limit(1)
+				.then((r) => r[0])
+		)
+
+		if (!user) return end(ctr.status(ctr.$status.UNAUTHORIZED).print({ success: false, errors: ['Unauthorized'] }))
+		ctr["@"].user = user
+
+		await ctr["@"].database.update(ctr["@"].database.schema.userSessions)
+			.set({
+				lastUsed: new Date()
+			})
+			.where(eq(ctr["@"].database.schema.userSessions.id, user.sessionId))
+
+		ctr.cookies.set('session', new Cookie(session, {
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: true,
+			domain: ctr["@"].env.APP_COOKIE_DOMAIN,
+			expires: Math.floor(time(7).d() / 1000)
+		}))
+
+		ctr.headers.set('X-User-ID', user.id.toString())
+	})
+
+export const userOrganizationValidator = new server.Validator()
+	.extend(userValidator)
+	.context<{
+		organization: {
+			id: number
+			name: string
+			icon: string | null
+			types: ServerType[]
+			ownerId: number
+			created: Date
+		}
+	}>()
+	.document({
+		parameters: [
+			{
+				name: 'organization',
+				in: 'path',
+				required: true,
+				schema: {
+					type: 'integer'
+				}
+			}
+		]
+	})
+	.httpRequest(async(ctr, end) => {
+		const organizationId = parseInt(ctr.params.get('organization', '0'))
+		if (!organizationId || isNaN(organizationId)) return end(ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: ['Invalid Organization ID'] }))
+
+		const organization = await ctr["@"].cache.use(`organization::${organizationId}`, () => ctr["@"].database.select({
+				id: ctr["@"].database.schema.organizations.id,
+				name: ctr["@"].database.schema.organizations.name,
+				icon: ctr["@"].database.schema.organizations.icon,
+				types: ctr["@"].database.schema.organizations.types,
+				ownerId: ctr["@"].database.schema.organizations.ownerId,
+				created: ctr["@"].database.schema.organizations.created
+			})
+				.from(ctr["@"].database.schema.organizations)
+				.innerJoin(ctr["@"].database.schema.users, eq(ctr["@"].database.schema.organizations.ownerId, ctr["@"].database.schema.users.id))
+				.leftJoin(ctr["@"].database.schema.organizationSubusers, eq(ctr["@"].database.schema.organizations.id, ctr["@"].database.schema.organizationSubusers.organizationId))
+				.where(and(
+					or(
+						eq(ctr["@"].database.schema.organizations.ownerId, ctr["@"].user.id),
+						eq(ctr["@"].database.schema.organizationSubusers.userId, ctr["@"].user.id)
+					),
+					eq(ctr["@"].database.schema.organizations.id, organizationId)
+				))
+				.limit(1)
+				.then((r) => r[0]),
+			time(5).m()
+		)
+
+		if (!organization) return end(ctr.status(ctr.$status.UNAUTHORIZED).print({ success: false, errors: ['Unauthorized'] }))
+		ctr["@"].organization = organization
+	})
+
 const clusterValidator = new server.Validator()
 	.httpRequest((ctr, end) => {
 		if (!env.CLUSTER_MAIN) return end(ctr.status(ctr.$status.SERVICE_UNAVAILABLE).print({ success: false, errors: ['Cluster is not available'] }))
@@ -120,6 +239,13 @@ export const organizationAPIRouter = new server.FileLoader('/api/organization')
 		fileBasedRouting: true
 	})
 	.validate(organizationValidator.use({ force: true }))
+	.export()
+
+export const userAPIRouter = new server.FileLoader('/api/user')
+	.load('api/routes/user', {
+		fileBasedRouting: true
+	})
+	.validate(userValidator.use({}))
 	.export()
 
 export const clusterAPIRouter = new server.FileLoader('/api/cluster')

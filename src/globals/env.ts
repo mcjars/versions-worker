@@ -24,10 +24,15 @@ const infos = z.object({
 	CLUSTER_REMOTE: z.string().optional(),
 	CLUSTER_TOKEN: z.string(),
 
+	GITHUB_CLIENT_ID: z.string(),
+	GITHUB_CLIENT_SECRET: z.string(),
+
 	LOG_LEVEL: z.union([ z.literal('none'), z.literal('info'), z.literal('debug') ]),
 	LOG_DIRECTORY: z.string().optional(),
 
-	APP_URL: z.string()
+	APP_URL: z.string(),
+	APP_FRONTEND_URL: z.string(),
+	APP_COOKIE_DOMAIN: z.string()
 })
 
 export type Environment = z.infer<typeof infos>

@@ -1,4 +1,4 @@
-import { isNotNull, relations } from "drizzle-orm"
+import { isNotNull, relations, sql } from "drizzle-orm"
 import { foreignKey, index, integer, primaryKey, pgTable, varchar, uniqueIndex, pgEnum, serial, jsonb, char, boolean, smallint, timestamp, inet, text } from "drizzle-orm/pg-core"
 
 export const types = [
@@ -57,10 +57,13 @@ export type InstallStep = {
 
 export const organizations = pgTable('organizations', {
 	id: serial('id').primaryKey().notNull(),
+	ownerId: integer('owner_id').notNull().references(() => users.id, { onDelete: 'cascade' }).default(1),
 
 	name: varchar('name', { length: 255 }).notNull(),
-	icon: varchar('icon', { length: 255 }).notNull(),
-	types: jsonb('types').notNull().$type<ServerType[]>()
+	icon: varchar('icon', { length: 255 }),
+	types: jsonb('types').notNull().$type<ServerType[]>(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
 }, (organizations) => ({
 	nameIdx: index('organizations_name_idx').on(organizations.name)
 }))
@@ -69,10 +72,22 @@ export const organizationKeys = pgTable('organization_keys', {
 	id: serial('id').primaryKey().notNull(),
 	organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
 
-	key: char('key', { length: 64 }).notNull()
+	name: varchar('name', { length: 255 }).notNull().default('Key'),
+	key: char('key', { length: 64 }).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
 }, (organizationKeys) => ({
 	organizationIdx: index('organizationKeys_organization_idx').on(organizationKeys.organizationId),
 	keyIdx: index('organizationKeys_key_idx').on(organizationKeys.key)
+}))
+
+export const organizationSubusers = pgTable('organization_subusers', {
+	organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+	userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' })
+}, (organizationSubusers) => ({
+	pk: primaryKey({ name: 'organizationSubusers_pk', columns: [organizationSubusers.organizationId, organizationSubusers.userId] }),
+	organizationIdx: index('organizationSubusers_organization_idx').on(organizationSubusers.organizationId),
+	userIdx: index('organizationSubusers_user_idx').on(organizationSubusers.userId)
 }))
 
 export const webhooks = pgTable('webhooks', {
@@ -88,6 +103,35 @@ export const webhooks = pgTable('webhooks', {
 }, (webhooks) => ({
 	organizationIdx: index('webhooks_organization_idx').on(webhooks.organizationId).where(isNotNull(webhooks.organizationId)),
 	enabledIdx: index('webhooks_enabled_idx').on(webhooks.enabled)
+}))
+
+export const users = pgTable('users', {
+	id: serial('id').primaryKey().notNull(),
+	githubId: integer('github_id').notNull().unique(),
+
+	name: varchar('name', { length: 255 }),
+	email: varchar('email', { length: 255 }).notNull(),
+	login: varchar('login', { length: 255 }).notNull(),
+
+	lastLogin: timestamp('last_login').default(sql`now()`).notNull(),
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (users) => ({
+	githubIdIdx: index('users_github_id_idx').on(users.githubId),
+	loginIdx: index('users_login_idx').on(users.login),
+	emailIdx: index('users_email_idx').on(users.email)
+}))
+
+export const userSessions = pgTable('user_sessions', {
+	id: serial('id').primaryKey().notNull(),
+	userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+
+	session: char('session', { length: 64 }).notNull(),
+
+	lastUsed: timestamp('last_used').default(sql`now()`).notNull(),
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (userSessions) => ({
+	userIdx: index('userSessions_user_idx').on(userSessions.userId),
+	sessionIdx: uniqueIndex('userSessions_session_idx').on(userSessions.session)
 }))
 
 export const requests = pgTable('requests', {
