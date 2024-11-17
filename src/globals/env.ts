@@ -21,10 +21,6 @@ const infos = z.object({
 	PORT: z.string().transform((str) => parseInt(str)).optional(),
 	S3_URL: z.string(),
 
-	CLUSTER_MAIN: z.union([ z.literal('true'), z.literal('false') ]).transform((str) => str === 'true'),
-	CLUSTER_REMOTE: z.string().optional(),
-	CLUSTER_TOKEN: z.string(),
-
 	GITHUB_CLIENT_ID: z.string(),
 	GITHUB_CLIENT_SECRET: z.string(),
 
