@@ -653,7 +653,8 @@ export default Object.assign(db, {
 			})
 				.from(schema.minecraftVersions)
 				.where(eq(schema.minecraftVersions.id, version))
-				.limit(1),
+				.limit(1)
+				.then((r) => r[0]),
 			db.select({
 				_: sql`1`
 			})
