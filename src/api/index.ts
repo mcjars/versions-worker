@@ -89,7 +89,16 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 		}
 	})
 	.httpRequest(async(ctr) => {
-		if (ctr.url.path.startsWith('/api') && !ctr.url.path.includes('github') && ctr.context.route?.type === 'http' && ctr.url.method !== 'OPTIONS' && ctr.url.method !== 'HEAD' && ctr.url.method !== 'TRACE' && ctr.url.method !== 'CONNECT') {
+		if (
+			!ctr.url.query.includes('tracking=none') &&
+			ctr.url.path.startsWith('/api') &&
+			!ctr.url.path.includes('github') &&
+			ctr.context.route?.type === 'http' &&
+			ctr.url.method !== 'OPTIONS' &&
+			ctr.url.method !== 'HEAD' &&
+			ctr.url.method !== 'TRACE' &&
+			ctr.url.method !== 'CONNECT'
+		) {
 			ctr["@"].request = cluster.log(
 				ctr.url.method,
 				ctr.url.href,
