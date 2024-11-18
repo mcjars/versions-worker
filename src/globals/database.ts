@@ -396,7 +396,9 @@ const versionsVelocity = db.select()
 	.orderBy(asc(sql`x."createdOldest"`))
 	.prepare('versions_velocity')
 
-export default Object.assign(db, {
+type DbWithoutWrite = Omit<typeof db, 'insert' | 'update' | 'delete'>
+
+export default Object.assign(db as DbWithoutWrite, {
 	write: writeDb,
 	schema,
 
@@ -450,6 +452,18 @@ export default Object.assign(db, {
 				changes: build.changes,
 
 				created: build.created ? new Date(build.created) : null
+			} as any
+		},
+
+		user<Data extends Record<string, any> | null | undefined>(raw: Data): Data extends null ? null : Data extends undefined ? null : Data {
+			if (!raw) return null as any
+
+			return {
+				id: raw.id,
+				name: raw.name,
+				avatar: `https://avatars.githubusercontent.com/u/${raw.githubId}`,
+				email: raw.email,
+				login: raw.login
 			} as any
 		}
 	},

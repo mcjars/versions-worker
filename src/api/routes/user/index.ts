@@ -1,5 +1,4 @@
 import { userAPIRouter } from "@/api"
-import { object } from "@rjweb/utils"
 
 export = new userAPIRouter.Path('/')
 	.http('GET', '/', (http) => http
@@ -26,9 +25,7 @@ export = new userAPIRouter.Path('/')
 		.onRequest((ctr) => {
 			return ctr.print({
 				success: true,
-				user: Object.assign(object.pick(ctr["@"].user, ['id', 'name', 'email', 'login']), {
-					avatar: `https://avatars.githubusercontent.com/u/${ctr["@"].user.githubId}`
-				})
+				user: ctr["@"].database.prepare.user(ctr["@"].user)
 			})
 		})
 	)

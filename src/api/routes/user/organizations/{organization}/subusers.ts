@@ -39,9 +39,7 @@ export = new userAPIRouter.Path('/')
 
 			return ctr.print({
 				success: true,
-				users: users.map((user) => Object.assign(object.pick(user.user, ['id', 'name', 'email', 'login']), {
-					avatar: `https://avatars.githubusercontent.com/u/${user.user.githubId}`
-				}))
+				users: users.map(ctr["@"].database.prepare.user)
 			})
 		})
 	)

@@ -99,69 +99,6 @@ async function lookupBuild(data: z.infer<typeof buildSearch>) {
 	return [ build, latest ]
 }
 
-/*export default function(router: GlobalRouter) {
-	router.post('/api/v2/build', async({ req }) => {
-		const data = z.union([
-			buildSearch,
-			buildSearch.array().min(1).max(10)
-		]).safeParse(await ctr["@"].json().catch(() => null))
-
-		const fields = Array.from(new Set((ctr["@"].query.fields ?? '')
-			.split(',')
-			.filter((field) => field.length > 0)
-		)) as 'id'[]
-
-		if (!data.success) return Response.json({ success: false, errors: data.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`) }, { status: 400 })
-
-		if (Array.isArray(data.data)) {
-			const builds = await Promise.all(data.data.map((build) => lookupBuild(build, req)))
-
-			return Response.json({
-				success: true,
-				builds: builds.map((build) => !build[0] || !build[1] ? null : ({
-					build: fields.length > 0 ? object.pick(ctr["@"].database.prepare.rawBuild(build[0]), fields) : ctr["@"].database.prepare.rawBuild(build[0]),
-					latest: fields.length > 0 && build[1] ? object.pick(ctr["@"].database.prepare.rawBuild(build[1]), fields) : ctr["@"].database.prepare.rawBuild(build[1]),
-					version: {
-						id: build[1].version_id || build[1].project_version_id,
-						type: build[1].version_type ?? undefined,
-						java: build[1].version_java ?? undefined,
-						supported: build[1].version_supported ? Boolean(build[1].version_supported) : undefined,
-						created: build[1].version_created ? new Date(build[1].version_created) : undefined,
-						builds: parseInt(build[1].build_count)
-					}
-				}))
-			})
-		} else {
-			const [ build, latest ] = await lookupBuild(data.data, req)
-			if (!build || !latest) return Response.json({ success: false, errors: ['Build not found'] }, { status: 404 })
-
-			ctr["@"].data.type = 'lookup'
-			ctr["@"].data.build = {
-				id: build.id,
-				type: build.type,
-				versionId: build.version_id,
-				projectVersionId: build.project_version_id,
-				buildNumber: build.build_number,
-				java: latest.version_java
-			}
-
-			return Response.json({
-				success: true,
-				build: fields.length > 0 ? object.pick(ctr["@"].database.prepare.rawBuild(build), fields) : ctr["@"].database.prepare.rawBuild(build),
-				latest: fields.length > 0 && latest ? object.pick(ctr["@"].database.prepare.rawBuild(latest), fields) : ctr["@"].database.prepare.rawBuild(latest),
-				version: {
-					id: latest.version_id || latest.project_version_id,
-					type: latest.version_type ?? undefined,
-					java: latest.version_java ?? undefined,
-					supported: latest.version_supported ?? undefined,
-					created: latest.version_created ? new Date(latest.version_created) : undefined,
-					builds: parseInt(latest.build_count)
-				}
-			})
-		}
-	})
-}*/
-
 export = new globalAPIRouter.Path('/')
 	.http('POST', '/', (http) => http
 		.document({

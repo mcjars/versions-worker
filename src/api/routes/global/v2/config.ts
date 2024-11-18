@@ -75,7 +75,7 @@ export = new globalAPIRouter.Path('/')
 						? 'TOML' : data.data.file.endsWith('.conf')
 							? 'CONF' : 'YAML',
 				3
-			), time(10).m())
+			), time(1).h())
 
 			return ctr.print({
 				success: true,

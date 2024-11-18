@@ -129,12 +129,12 @@ export = new organizationAPIRouter.Path('/')
 		})
 		.onRequest(async(ctr) => {
 			const data = z.object({
-				types: z.string().refine((type) => types.includes(type as 'VANILLA')).array()
+				types: z.string().refine((type) => types.includes(type as 'VANILLA')).array().max(types.length)
 			}).safeParse(await ctr.$body().json().catch(() => null))
 
 			if (!data.success) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: data.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`) })
 
-			await ctr["@"].database.update(ctr["@"].database.schema.organizations)
+			await ctr["@"].database.write.update(ctr["@"].database.schema.organizations)
 				.set({
 					types: data.data.types as 'VANILLA'[]
 				})

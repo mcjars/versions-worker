@@ -59,15 +59,11 @@ export = new userAPIRouter.Path('/')
 				success: true,
 				organizations: {
 					owned: organizations.filter((organization) => organization.owner.id === ctr["@"].user.id).map((organization) => Object.assign(organization, {
-						owner: Object.assign(object.pick(organization.owner, ['id', 'name', 'email', 'login']), {
-							avatar: `https://avatars.githubusercontent.com/u/${organization.owner.githubId}`
-						})
+						owner: ctr["@"].database.prepare.user(organization.owner)
 					})),
 
 					member: organizations.filter((organization) => organization.owner.id !== ctr["@"].user.id).map((organization) => Object.assign(organization, {
-						owner: Object.assign(object.pick(organization.owner, ['id', 'name', 'email', 'login']), {
-							avatar: `https://avatars.githubusercontent.com/u/${organization.owner.githubId}`
-						})
+						owner: ctr["@"].database.prepare.user(organization.owner)
 					}))
 				}
 			})

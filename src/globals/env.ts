@@ -24,7 +24,7 @@ const infos = z.object({
 	GITHUB_CLIENT_ID: z.string(),
 	GITHUB_CLIENT_SECRET: z.string(),
 
-	LOG_LEVEL: z.union([ z.literal('none'), z.literal('info'), z.literal('debug') ]),
+	LOG_LEVEL: z.enum(['none', 'info', 'debug']),
 	LOG_DIRECTORY: z.string().optional(),
 
 	APP_URL: z.string(),

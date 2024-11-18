@@ -6,7 +6,7 @@ import env from "@/globals/env"
 import cache from "@/globals/cache"
 import github from "@/globals/github"
 import { Runtime } from "@rjweb/runtime-node"
-import * as cluster from "@/globals/cluster"
+import * as requests from "@/globals/requests"
 import { ServerType, types } from "@/schema"
 import { and, eq, or } from "drizzle-orm"
 import { time } from "@rjweb/utils"
@@ -59,7 +59,7 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 			created: Date
 		}
 
-		request: cluster.Request | null
+		request: requests.Request | null
 	}>()
 	.httpRequest(async(ctr, end, options) => {
 		const authorization = ctr.headers.get('authorization', '')
@@ -99,7 +99,7 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 			ctr.url.method !== 'TRACE' &&
 			ctr.url.method !== 'CONNECT'
 		) {
-			ctr["@"].request = cluster.log(
+			ctr["@"].request = requests.log(
 				ctr.url.method,
 				ctr.url.href,
 				await ctr.$body().json().catch(() => null),
@@ -117,7 +117,7 @@ const organizationValidator = new server.Validator<{ force: boolean }>()
 	})
 	.httpRequestFinish((ctr) => {
 		if (ctr["@"].request) {
-			cluster.finish(ctr["@"].request, ctr.context.response.status, ctr.context.elapsed())
+			requests.finish(ctr["@"].request, ctr.context.response.status, ctr.context.elapsed())
 		}
 	})
 

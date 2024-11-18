@@ -27,7 +27,7 @@ export default Object.assign(redis, {
 
 		const runResult = await Promise.resolve(run())
 		if (!expire) await redis.set(`internal-middlewares::cache::${key}`, JSON.stringify(runResult))
-		else if (expire > time(15).s()) await redis.set(`internal-middlewares::cache::${key}`, JSON.stringify(runResult), 'EX', Math.floor(expire / 1000))
+		else if (expire > time(15).s()) await redis.set(`internal-middlewares::cache::${key}`, JSON.stringify(runResult), 'EX', Math.ceil(expire / 1000))
 		else {
 			localCache.set(`internal-middlewares::cache::${key}`, runResult)
 
