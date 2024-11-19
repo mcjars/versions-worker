@@ -21,15 +21,15 @@ const infos = z.object({
 	PORT: z.string().transform((str) => parseInt(str)).optional(),
 	S3_URL: z.string(),
 
-	GITHUB_CLIENT_ID: z.string(),
-	GITHUB_CLIENT_SECRET: z.string(),
+	GITHUB_CLIENT_ID: z.string().optional(),
+	GITHUB_CLIENT_SECRET: z.string().optional(),
 
 	LOG_LEVEL: z.enum(['none', 'info', 'debug']),
 	LOG_DIRECTORY: z.string().optional(),
 
 	APP_URL: z.string(),
-	APP_FRONTEND_URL: z.string(),
-	APP_COOKIE_DOMAIN: z.string()
+	APP_FRONTEND_URL: z.string().optional(),
+	APP_COOKIE_DOMAIN: z.string().optional()
 })
 
 export type Environment = z.infer<typeof infos>

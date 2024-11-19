@@ -63,6 +63,6 @@ export = new globalAPIRouter.Path('/')
 				expires: Math.floor(time(7).d() / 1000)
 			}))
 
-			return ctr.redirect(ctr["@"].env.APP_FRONTEND_URL)
+			return ctr.redirect(ctr["@"].env.APP_FRONTEND_URL ?? ctr["@"].env.APP_URL, 'temporary')
 		})
 	)

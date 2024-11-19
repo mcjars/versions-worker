@@ -31,7 +31,7 @@ export const server = new Server(Runtime, {
 	Cors.use({
 		credentials: true,
 		allowAll: false,
-		origins: [env.APP_FRONTEND_URL, '*'],
+		origins: [env.APP_FRONTEND_URL ?? '*', '*'],
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 		headers: ['Authorization', 'Content-Type', 'Accept'],
 		exposeHeaders: ['Authorization', 'Content-Type', 'Accept']

@@ -1,4 +1,4 @@
-# versions-worker - MCJars Minecraft Versions API
+# api - MCJars Minecraft Versions API
 
 mcvapi (versions-worker) is an api tool for retrieving Minecraft server versions. It allows you to easily download, install, and lookup Minecraft server versions. This is the api part that runs on 4 HA Hetzner VMs with 2 Load Balancers.
 
@@ -14,9 +14,9 @@ mcvapi (versions-worker) is an api tool for retrieving Minecraft server versions
 To Develop on this api tool, you need to install all required dependencies
 
 ```bash
-git clone https://github.com/mcjars/versions-worker.git versions-worker
+git clone https://github.com/mcjars/api.git api
 
-cd versions-worker
+cd api
 
 # make sure to have nodejs installed already
 npm i -g pnpm
