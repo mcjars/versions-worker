@@ -29,4 +29,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ghcr.io/mcjars/versions-worker:latest
+          tags: ghcr.io/mcjars/api:latest
