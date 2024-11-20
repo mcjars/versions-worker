@@ -1,4 +1,5 @@
 import { server } from "@/api"
+import { time } from "@rjweb/utils"
 
 const blacklistedHeaders = [
 	'content-encoding',
@@ -7,6 +8,10 @@ const blacklistedHeaders = [
 ]
 
 server.path('/download', (path) => path
+	.httpRatelimit((limit) => limit
+		.hits(5)
+		.window(time(10).s())
+	)
 	.http('GET', '/fabric/{version}/{projectVersion}/{installerVersion}', (http) => http
 		.onRequest(async(ctr) => {
 			const version = ctr.params.get('version', ''),
@@ -32,16 +37,7 @@ server.path('/download', (path) => path
 
 			response.headers.forEach((value, key) => blacklistedHeaders.includes(key) || ctr.headers.set(key, value))
 
-			return ctr.status(response.status).printChunked(async(print) => {
-				const reader = response.body!.getReader()
-
-				while (true) {
-					const { done, value } = await reader.read()
-					if (done) break
-
-					await print(value)
-				}
-			})
+			return ctr.status(response.status).print(await response.arrayBuffer())
 		})
 	)
 	.http('GET', '/leaves/{version}/{build}/{file}', (http) => http
@@ -55,16 +51,7 @@ server.path('/download', (path) => path
 
 			response.headers.forEach((value, key) => blacklistedHeaders.includes(key) || ctr.headers.set(key, value))
 
-			return ctr.status(response.status).printChunked(async(print) => {
-				const reader = response.body!.getReader()
-
-				while (true) {
-					const { done, value } = await reader.read()
-					if (done) break
-
-					await print(value)
-				}
-			})
+			return ctr.status(response.status).print(await response.arrayBuffer())
 		})
 	)
 )

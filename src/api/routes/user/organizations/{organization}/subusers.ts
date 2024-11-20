@@ -96,7 +96,7 @@ export = new userAPIRouter.Path('/')
 					.from(ctr["@"].database.schema.users)
 					.where(ilike(ctr["@"].database.schema.users.login, data.data.login))
 					.then((r) => r[0]?.id),
-				time(5).m()
+				time(1).h()
 			)
 
 			if (!userId) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: ['User not found'] })
@@ -150,7 +150,7 @@ export = new userAPIRouter.Path('/')
 					.from(ctr["@"].database.schema.users)
 					.where(ilike(ctr["@"].database.schema.users.login, ctr.params.get('subuser', '')))
 					.then((r) => r[0]?.id),
-				time(5).m()
+				time(1).h()
 			)
 
 			if (ctr["@"].organization.ownerId !== ctr["@"].user.id && userId !== ctr["@"].user.id) return ctr.status(ctr.$status.FORBIDDEN).print({ success: false, errors: ['You do not have permission to remove subusers'] })
