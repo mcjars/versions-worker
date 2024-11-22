@@ -80,7 +80,8 @@ const process = async(): Promise<void> => {
 		}
 
 		await database.write.insert(schema.requests)
-			.values(requests).catch(() => null)
+			.values(requests)
+			.onConflictDoNothing()
 	} catch (err) {
 		processing.push(...requests)
 		throw err
