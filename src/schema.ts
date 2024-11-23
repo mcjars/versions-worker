@@ -64,9 +64,9 @@ export const organizations = pgTable('organizations', {
 	types: jsonb('types').notNull().$type<ServerType[]>(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
-}, (organizations) => ({
-	nameIdx: index('organizations_name_idx').on(organizations.name)
-}))
+}, (organizations) => [
+	index('organizations_name_idx').on(organizations.name)
+])
 
 export const organizationKeys = pgTable('organization_keys', {
 	id: serial('id').primaryKey().notNull(),
@@ -76,19 +76,19 @@ export const organizationKeys = pgTable('organization_keys', {
 	key: char('key', { length: 64 }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
-}, (organizationKeys) => ({
-	organizationIdx: index('organizationKeys_organization_idx').on(organizationKeys.organizationId),
-	keyIdx: index('organizationKeys_key_idx').on(organizationKeys.key)
-}))
+}, (organizationKeys) => [
+	index('organizationKeys_organization_idx').on(organizationKeys.organizationId),
+	index('organizationKeys_key_idx').on(organizationKeys.key)
+])
 
 export const organizationSubusers = pgTable('organization_subusers', {
 	organizationId: integer('organization_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
 	userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' })
-}, (organizationSubusers) => ({
-	pk: primaryKey({ name: 'organizationSubusers_pk', columns: [organizationSubusers.organizationId, organizationSubusers.userId] }),
-	organizationIdx: index('organizationSubusers_organization_idx').on(organizationSubusers.organizationId),
-	userIdx: index('organizationSubusers_user_idx').on(organizationSubusers.userId)
-}))
+}, (organizationSubusers) => [
+	primaryKey({ name: 'organizationSubusers_pk', columns: [organizationSubusers.organizationId, organizationSubusers.userId] }),
+	index('organizationSubusers_organization_idx').on(organizationSubusers.organizationId),
+	index('organizationSubusers_user_idx').on(organizationSubusers.userId)
+])
 
 export const webhooks = pgTable('webhooks', {
 	id: serial('id').primaryKey().notNull(),
@@ -100,14 +100,14 @@ export const webhooks = pgTable('webhooks', {
 	enabled: boolean('enabled').default(true).notNull(),
 	successful: integer('successful').default(0).notNull(),
 	failed: integer('failed').default(0).notNull()
-}, (webhooks) => ({
-	organizationIdx: index('webhooks_organization_idx').on(webhooks.organizationId).where(isNotNull(webhooks.organizationId)),
-	enabledIdx: index('webhooks_enabled_idx').on(webhooks.enabled)
-}))
+}, (webhooks) => [
+	index('webhooks_organization_idx').on(webhooks.organizationId).where(isNotNull(webhooks.organizationId)),
+	index('webhooks_enabled_idx').on(webhooks.enabled)
+])
 
 export const users = pgTable('users', {
 	id: serial('id').primaryKey().notNull(),
-	githubId: integer('github_id').notNull().unique(),
+	githubId: integer('github_id').notNull(),
 
 	name: varchar('name', { length: 255 }),
 	email: varchar('email', { length: 255 }).notNull(),
@@ -115,11 +115,11 @@ export const users = pgTable('users', {
 
 	lastLogin: timestamp('last_login').default(sql`now()`).notNull(),
 	created: timestamp('created').default(sql`now()`).notNull()
-}, (users) => ({
-	githubIdIdx: index('users_github_id_idx').on(users.githubId),
-	loginIdx: index('users_login_idx').on(users.login),
-	emailIdx: index('users_email_idx').on(users.email)
-}))
+}, (users) => [
+	uniqueIndex('users_github_id_idx').on(users.githubId),
+	uniqueIndex('users_login_idx').on(users.login),
+	index('users_email_idx').on(users.email)
+])
 
 export const userSessions = pgTable('user_sessions', {
 	id: serial('id').primaryKey().notNull(),
@@ -129,10 +129,10 @@ export const userSessions = pgTable('user_sessions', {
 
 	lastUsed: timestamp('last_used').default(sql`now()`).notNull(),
 	created: timestamp('created').default(sql`now()`).notNull()
-}, (userSessions) => ({
-	userIdx: index('userSessions_user_idx').on(userSessions.userId),
-	sessionIdx: uniqueIndex('userSessions_session_idx').on(userSessions.session)
-}))
+}, (userSessions) => [
+	index('userSessions_user_idx').on(userSessions.userId),
+	uniqueIndex('userSessions_session_idx').on(userSessions.session)
+])
 
 export const requests = pgTable('requests', {
 	id: char('id', { length: 12 }).primaryKey().notNull(),
@@ -150,15 +150,15 @@ export const requests = pgTable('requests', {
 	data: jsonb('data'),
 	userAgent: varchar('user_agent', { length: 255 }).notNull(),
 	created: timestamp('created').notNull()
-}, (requests) => ({
-	organizationIdx: index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
-	ipIdx: index('requests_ip_idx').on(requests.ip),
-	pathIdx: index('requests_path_idx').on(requests.path),
-	continentIdx: index('requests_continent_idx').on(requests.continent).where(isNotNull(requests.continent)),
-	countryIdx: index('requests_country_idx').on(requests.country).where(isNotNull(requests.country)),
-	dataIdx: index('requests_data_idx').on(requests.data).where(isNotNull(requests.data)),
-	createdIdx: index('requests_created_idx').on(requests.created)
-}))
+}, (requests) => [
+	index('requests_organization_idx').on(requests.organizationId).where(isNotNull(requests.organizationId)),
+	index('requests_ip_idx').on(requests.ip),
+	index('requests_path_idx').on(requests.path),
+	index('requests_continent_idx').on(requests.continent).where(isNotNull(requests.continent)),
+	index('requests_country_idx').on(requests.country).where(isNotNull(requests.country)),
+	index('requests_data_idx').on(requests.data).where(isNotNull(requests.data)),
+	index('requests_created_idx').on(requests.created)
+])
 
 export const minecraftVersions = pgTable('minecraft_versions', {
 	id: varchar('id', { length: 63 }).primaryKey().notNull(),
@@ -168,18 +168,19 @@ export const minecraftVersions = pgTable('minecraft_versions', {
 	java: smallint('java').default(21).notNull(),
 
 	created: timestamp('created').notNull()
-}, (minecraftVersions) => ({
-	typeIdx: index('minecraftVersions_type_idx').on(minecraftVersions.type),
-	javaIdx: index('minecraftVersions_java_idx').on(minecraftVersions.java)
-}))
+}, (minecraftVersions) => [
+	index('minecraftVersions_type_idx').on(minecraftVersions.type),
+	index('minecraftVersions_java_idx').on(minecraftVersions.java)
+])
 
 export const projectVersions = pgTable('project_versions', {
 	id: varchar('id', { length: 63 }).notNull(),
 	type: typesEnum('type').notNull()
-}, (projectVersions) => ({
-	pk: primaryKey({ name: 'projectVersions_pk', columns: [projectVersions.type, projectVersions.id] }),
-	typeIdx: index('projectVersions_type_idx').on(projectVersions.type)
-}))
+}, (projectVersions) => [
+	primaryKey({ name: 'projectVersions_pk', columns: [projectVersions.type, projectVersions.id] }),
+
+	index('projectVersions_type_idx').on(projectVersions.type)
+])
 
 export const minecraftVersionsRelations = relations(minecraftVersions, ({ many }) => ({
 	builds: many(builds, { relationName: 'versions' })
@@ -209,24 +210,26 @@ export const builds = pgTable('builds', {
 	installation: jsonb('installation').$type<InstallStep[][]>().notNull(),
 	changes: jsonb('changes').$type<string[]>().notNull(),
 	created: timestamp('created')
-}, (builds) => ({
-	typeIdx: index('builds_type_idx').on(builds.type),
-	experimentalIdx: index('builds_experimental_idx').on(builds.experimental),
-	buildNumberIdx: index('builds_build_number_idx').on(builds.buildNumber),
-	jarUrlIdx: index('builds_jar_url_idx').on(builds.jarUrl),
-	jarSizeIdx: index('builds_jar_size_idx').on(builds.jarSize),
-	zipUrlIdx: index('builds_zip_url_idx').on(builds.zipUrl),
-	zipSizeIdx: index('builds_zip_size_idx').on(builds.zipSize),
-	createdIdx: index('builds_created_idx').on(builds.created).where(isNotNull(builds.created)),
-	versionTypeIdx: index('builds_version_type_idx').on(builds.versionId, builds.type),
-	projectVersionTypeIdx: index('builds_project_version_type_idx').on(builds.projectVersionId, builds.type),
-	versionIdx: index('builds_version_idx').on(builds.versionId),
-	projectVersionFk: foreignKey({
+}, (builds) => [
+	index('builds_type_idx').on(builds.type),
+	index('builds_experimental_idx').on(builds.experimental),
+	index('builds_build_number_idx').on(builds.buildNumber),
+	index('builds_jar_url_idx').on(builds.jarUrl).where(isNotNull(builds.jarUrl)),
+	index('builds_jar_size_idx').on(builds.jarSize).where(isNotNull(builds.jarSize)),
+	index('builds_zip_url_idx').on(builds.zipUrl).where(isNotNull(builds.zipUrl)),
+	index('builds_zip_size_idx').on(builds.zipSize).where(isNotNull(builds.zipSize)),
+	index('builds_created_idx').on(builds.created).where(isNotNull(builds.created)),
+	index('builds_version_type_idx').on(builds.versionId, builds.type),
+	index('builds_project_version_type_idx').on(builds.projectVersionId, builds.type),
+	index('builds_version_idx').on(builds.versionId),
+	index('builds_changes_idx').on(builds.changes).where(sql`jsonb_array_length(changes) > 0 AND jsonb_array_length(changes) < 10`),
+
+	foreignKey({
 		columns: [builds.type, builds.projectVersionId],
 		foreignColumns: [projectVersions.type, projectVersions.id],
 		name: 'builds_project_version_fk'
 	}).onDelete('cascade')
-}))
+])
 
 export const buildsRelations = relations(builds, ({ one, many }) => ({
 	version: one(minecraftVersions, {
@@ -255,16 +258,16 @@ export const buildHashes = pgTable('build_hashes', {
 	sha384: char('sha384', { length: 96 }).notNull(),
 	sha512: char('sha512', { length: 128 }).notNull(),
 	md5: char('md5', { length: 32 }).notNull()
-}, (hashes) => ({
-	buildIdx: index('buildHashes_build_idx').on(hashes.buildId),
-	primaryIdx: index('buildHashes_primary_idx').on(hashes.primary),
-	sha1Idx: index('buildHashes_sha1_idx').on(hashes.sha1),
-	sha224Idx: index('buildHashes_sha224_idx').on(hashes.sha224),
-	sha256Idx: index('buildHashes_sha256_idx').on(hashes.sha256),
-	sha384Idx: index('buildHashes_sha384_idx').on(hashes.sha384),
-	sha512Idx: index('buildHashes_sha512_idx').on(hashes.sha512),
-	md5Idx: index('buildHashes_md5_idx').on(hashes.md5)
-}))
+}, (hashes) => [
+	index('buildHashes_build_idx').on(hashes.buildId),
+	index('buildHashes_primary_idx').on(hashes.primary),
+	index('buildHashes_sha1_idx').on(hashes.sha1),
+	index('buildHashes_sha224_idx').on(hashes.sha224),
+	index('buildHashes_sha256_idx').on(hashes.sha256),
+	index('buildHashes_sha384_idx').on(hashes.sha384),
+	index('buildHashes_sha512_idx').on(hashes.sha512),
+	index('buildHashes_md5_idx').on(hashes.md5)
+])
 
 export const buildHashesRelations = relations(buildHashes, ({ one }) => ({
 	build: one(builds, {
@@ -276,14 +279,13 @@ export const buildHashesRelations = relations(buildHashes, ({ one }) => ({
 export const configs = pgTable('configs', {
 	id: serial('id').primaryKey().notNull(),
 
-	location: varchar('location', { length: 51 }).unique().notNull(),
+	location: varchar('location', { length: 51 }).notNull().unique(),
 	type: typesEnum('type').notNull(),
 	format: formatsEnum('format').notNull()
-}, (configs) => ({
-	typeIdx: index('configs_type_idx').on(configs.type),
-	formatIdx: index('configs_format_idx').on(configs.format),
-	uniqueLocationIdx: uniqueIndex('configs_unique_location_idx').on(configs.location)
-}))
+}, (configs) => [
+	index('configs_type_idx').on(configs.type),
+	index('configs_format_idx').on(configs.format)
+])
 
 export const configValues = pgTable('config_values', {
 	id: serial('id').primaryKey().notNull(),
@@ -297,18 +299,19 @@ export const configValues = pgTable('config_values', {
 	md5: char('md5', { length: 32 }).notNull(),
 
 	value: text('value').notNull()
-}, (configValues) => ({
-	configIdx: index('configValues_config_idx').on(configValues.configId),
-	uniqueConfigSha512Idx: uniqueIndex('configValues_unique_config_sha512_idx').on(configValues.configId, configValues.sha512)
-}))
+}, (configValues) => [
+	index('configValues_config_idx').on(configValues.configId),
+	uniqueIndex('configValues_unique_config_sha512_idx').on(configValues.configId, configValues.sha512)
+])
 
 export const buildConfigs = pgTable('build_configs', {
 	buildId: integer('build_id').notNull().references(() => builds.id, { onDelete: 'cascade' }),
 	configId: integer('config_id').notNull().references(() => configs.id, { onDelete: 'cascade' }),
 	configValueId: integer('config_value_id').notNull().references(() => configValues.id, { onDelete: 'cascade' })
-}, (buildConfigs) => ({
-	pk: primaryKey({ name: 'buildConfigs_pk', columns: [buildConfigs.buildId, buildConfigs.configId] }),
-	buildIdx: index('buildConfigs_build_idx').on(buildConfigs.buildId),
-	configIdx: index('buildConfigs_config_idx').on(buildConfigs.configId),
-	configValueIdx: index('buildConfigs_config_value_idx').on(buildConfigs.configValueId)
-}))
+}, (buildConfigs) => [
+	primaryKey({ name: 'buildConfigs_pk', columns: [buildConfigs.buildId, buildConfigs.configId] }),
+
+	index('buildConfigs_build_idx').on(buildConfigs.buildId),
+	index('buildConfigs_config_idx').on(buildConfigs.configId),
+	index('buildConfigs_config_value_idx').on(buildConfigs.configValueId)
+])
