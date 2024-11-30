@@ -1,5 +1,5 @@
 import { userAPIRouter, userOrganizationValidator } from "@/api"
-import { object, time } from "@rjweb/utils"
+import { time } from "@rjweb/utils"
 import { and, count, eq, ilike } from "drizzle-orm"
 import { z } from "zod"
 
@@ -39,7 +39,7 @@ export = new userAPIRouter.Path('/')
 
 			return ctr.print({
 				success: true,
-				users: users.map(ctr["@"].database.prepare.user)
+				users: users.map((user) => ctr["@"].database.prepare.user(user.user))
 			})
 		})
 	)
