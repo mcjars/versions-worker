@@ -1,4 +1,4 @@
-import { Server, version as Version, Cors, Cookie } from "rjweb-server"
+import { Server, version as Version, Cors, Cookie, html } from "rjweb-server"
 import getVersion from "@/index"
 import logger from "@/globals/logger"
 import database from "@/globals/database"
@@ -249,6 +249,15 @@ export const userAPIRouter = new server.FileLoader('/api/user')
 	.validate(userValidator.use({}))
 	.export()
 
+function getPriority(path: string) {
+	if (!path.startsWith('/api')) return 0
+	if (path.includes('/api/v2')) return 1
+	if (path.includes('/api/v1')) return 2
+	if (path.includes('/api/organization')) return 3
+
+	return 4
+}
+
 server.path('/', (path) => path
 	.http('GET', '/openapi.json', (http) => http
 		.onRequest((ctr) => {
@@ -261,16 +270,52 @@ server.path('/', (path) => path
 			})
 
 			openAPI.components = {
-        ...openAPI.components,
-        securitySchemes: {
-          api_key: {
-            type: 'apiKey',
-            in: 'header',
-            name: 'Authorization',
-            scheme: 'token'
-          }
-        }
-      }
+				...openAPI.components,
+				securitySchemes: {
+					api_key: {
+						type: 'apiKey',
+						in: 'header',
+						name: 'Authorization',
+						scheme: 'token'
+					}
+				}
+			}
+
+			const endpoints = Object.assign({}, openAPI.paths!)
+
+			for (const path in endpoints) {
+				if (!path.startsWith('/api')) continue
+
+				const type = path.includes('/api/v1')
+					? '/api/v1'
+					: path.includes('/api/v2')
+						? '/api/v2'
+						: path.includes('/api/organization')
+							? '/api/organization'
+							: '/api/user'
+
+				for (const method in endpoints[path]) {
+					endpoints[path][method as 'delete']!.tags = [type]
+				}
+			}
+
+			const sortedPaths = Object.keys(endpoints).sort((a, b) => {			
+				const priorityA = getPriority(a)
+				const priorityB = getPriority(b)
+
+				if (priorityA !== priorityB) {
+					return priorityA - priorityB
+				}
+				
+				return a.localeCompare(b)
+			})
+			
+			const sortedEndpoints: typeof endpoints = {}
+			for (const path of sortedPaths) {
+				sortedEndpoints[path] = endpoints[path]
+			}
+
+			openAPI.paths = sortedEndpoints			
 
 			return ctr.print(openAPI)
 		})
@@ -318,7 +363,7 @@ server.path('/', (path) => path
 		.onRequest((ctr) => {
 			ctr.headers.set('Content-Type', 'text/html')
 
-			return ctr.print(`
+			return ctr.print(html`
 <!DOCTYPE html>
 <html>
 	<head>
@@ -336,7 +381,7 @@ server.path('/', (path) => path
 		<meta name="description" content="MCJars is a Minecraft Server Jar Website which allows you to download versions or reverse lookup for your favourite projects easily.">
 	</head>
 	<body>
-		<script id="api-reference" data-url="/openapi.json"></script>
+		<script id="api-reference" data-url="/openapi.json" data-configuration="${JSON.stringify({ defaultOpenAllTags: true, hideClientButton: true })}"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
 	</body>
 </html>

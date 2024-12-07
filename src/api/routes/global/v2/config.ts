@@ -1,4 +1,5 @@
 import { globalAPIRouter } from "@/api"
+import { configs } from "@/globals/database"
 import { object, time, string } from "@rjweb/utils"
 import { z } from "zod"
 
@@ -51,7 +52,23 @@ export = new globalAPIRouter.Path('/')
 						}
 					}
 				}
-			},
+			}, requestBody: {
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								file: {
+									type: 'string',
+									enum: Object.keys(configs)
+								}, config: {
+									type: 'string'
+								}
+							}, required: ['file', 'config']
+						}
+					}
+				}
+			}
 		})
 		.onRequest(async(ctr) => {
 			const data = z.object({

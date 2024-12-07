@@ -209,10 +209,10 @@ export const configs: Record<string, {
 
 	// Spigot
 	'spigot.yml': {
-		type: 'PAPER',
+		type: 'SPIGOT',
 		format: 'YAML'
 	}, 'bukkit.yml': {
-		type: 'PAPER',
+		type: 'SPIGOT',
 		format: 'YAML'
 	},
 
@@ -581,20 +581,12 @@ export default Object.assign(db as DbWithoutWrite, {
 				similarity: sql`SIMILARITY(${schema.configValues.value}, ${config})`.as('similarity')
 			})
 				.from(schema.configValues)
-				.innerJoin(
-					schema.buildConfigs,
-					eq(schema.buildConfigs.configValueId, schema.configValues.id)
-				)
-				.innerJoin(
-					schema.builds,
-					and(
-						eq(schema.builds.id, schema.buildConfigs.buildId),
-						eq(schema.builds.type, configs[file].type)
-					)
-				)
-				.where(and(
-					inArray(schema.configValues.id, query.map((c) => c.id))
+				.innerJoin(schema.buildConfigs, eq(schema.buildConfigs.configValueId, schema.configValues.id))
+				.innerJoin(schema.builds, and(
+					eq(schema.builds.id, schema.buildConfigs.buildId),
+					eq(schema.builds.type, configs[file].type)
 				))
+				.where(inArray(schema.configValues.id, query.map((c) => c.id)))
 				.orderBy(desc(sql`similarity`))
 				.limit(matches)
 		}
