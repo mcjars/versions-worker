@@ -604,7 +604,7 @@ export default Object.assign(db as DbWithoutWrite, {
 				like(schema.configValues.value, `%${contains}%`)
 			))
 			.innerJoin(schema.builds, eq(schema.builds.id, schema.buildConfigs.buildId))
-			.groupBy(schema.configValues.id)
+			.groupBy(schema.configValues.id, schema.builds.id)
 			.limit(matches)
 	},
 
