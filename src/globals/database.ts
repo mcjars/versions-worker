@@ -603,7 +603,10 @@ export default Object.assign(db as DbWithoutWrite, {
 				eq(schema.configs.format, format),
 				like(schema.configValues.value, `%${contains}%`)
 			))
-			.innerJoin(schema.builds, eq(schema.builds.id, schema.buildConfigs.buildId))
+			.innerJoin(schema.builds, and(
+				eq(schema.builds.id, schema.buildConfigs.buildId),
+				eq(schema.builds.type, configs[file].type)
+			))
 			.groupBy(schema.configValues.id, schema.builds.id)
 			.limit(matches)
 	},
