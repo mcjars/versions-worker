@@ -54,4 +54,17 @@ server.path('/download', (path) => path
 			return ctr.status(response.status).print(await response.arrayBuffer())
 		})
 	)
+	.http('GET', '/canvas/{build}/{file}', (http) => http
+		.onRequest(async(ctr) => {
+			const build = ctr.params.get('build', ''),
+				file = ctr.params.get('file', '')
+
+			const response = await fetch(`https://github.com/CraftCanvasMC/Canvas/releases/download/${build}/${file}`).catch(() => null)
+			if (!response?.ok) return ctr.status(ctr.$status.NOT_FOUND).print({ success: false, errors: ['Build not found'] })
+
+			response.headers.forEach((value, key) => blacklistedHeaders.includes(key) || ctr.headers.set(key, value))
+
+			return ctr.status(response.status).print(await response.arrayBuffer())
+		})
+	)
 )
