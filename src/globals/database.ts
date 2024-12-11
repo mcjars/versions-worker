@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres"
 import * as schema from "@/schema"
 import { time } from "@rjweb/utils"
-import { and, asc, count, countDistinct, desc, eq, inArray, like, max, min, sql } from "drizzle-orm"
+import { and, asc, count, countDistinct, eq, max, min, sql } from "drizzle-orm"
 import env from "@/globals/env"
 import cache from "@/globals/cache"
 import yaml from "js-yaml"
@@ -528,87 +528,6 @@ export default Object.assign(db as DbWithoutWrite, {
 			.replace(/seed-(.*): (.*)/g, 'seed-$1: xxx')
 
 		return value
-	},
-
-	async searchConfig(name: string, config: string, format: schema.Format, matches: number) {
-		const file = Object.keys(configs).find((file) => file.endsWith(name))
-		if (!file) return []
-
-		let contains: string | null = null
-
-		switch (format) {
-			case "YAML": {
-				if (!contains) {
-					const configVersion = config.match(/config-version:\s*(.+)/)?.[1]
-					if (configVersion) contains = `config-version: ${configVersion}`
-				}
-
-				if (!contains) {
-					const configVersion = config.match(/version:\s*(.+)/)?.[1]
-					if (configVersion) contains = `version: ${configVersion}`
-				}
-
-				break
-			}
-
-			case "TOML": {
-				if (!contains) {
-					const configVersion = config.match(/config-version\s*=\s*(.+)/)?.[1]
-					if (configVersion) contains = `config-version = ${configVersion}`
-				}
-
-				break
-			}
-		}
-
-		if (!contains) {
-			const query = await db.select({
-				id: schema.configValues.id,
-				similarity: sql`SIMILARITY(${schema.configValues.value}, ${config})`.as('similarity')
-			})
-				.from(schema.configValues)
-				.innerJoin(schema.configs, eq(schema.configs.id, schema.configValues.configId))
-				.where(and(
-					eq(schema.configs.type, configs[file].type),
-					eq(schema.configs.format, format)
-				))
-				.orderBy(desc(sql`similarity`))
-				.limit(3)
-
-			return db.select({
-				build: this.fields.build,
-				value: schema.configValues.value,
-				similarity: sql`SIMILARITY(${schema.configValues.value}, ${config})`.as('similarity')
-			})
-				.from(schema.configValues)
-				.innerJoin(schema.buildConfigs, eq(schema.buildConfigs.configValueId, schema.configValues.id))
-				.innerJoin(schema.builds, and(
-					eq(schema.builds.id, schema.buildConfigs.buildId),
-					eq(schema.builds.type, configs[file].type)
-				))
-				.where(inArray(schema.configValues.id, query.map((c) => c.id)))
-				.orderBy(desc(sql`similarity`))
-				.limit(matches)
-		}
-
-		return db.select({
-			build: this.fields.build,
-			value: schema.configValues.value
-		})
-			.from(schema.buildConfigs)
-			.innerJoin(schema.configValues, eq(schema.configValues.id, schema.buildConfigs.configValueId))
-			.innerJoin(schema.configs, eq(schema.configs.id, schema.configValues.configId))
-			.where(and(
-				eq(schema.configs.type, configs[file].type),
-				eq(schema.configs.format, format),
-				like(schema.configValues.value, `%${contains}%`)
-			))
-			.innerJoin(schema.builds, and(
-				eq(schema.builds.id, schema.buildConfigs.buildId),
-				eq(schema.builds.type, configs[file].type)
-			))
-			.groupBy(schema.configValues.id, schema.builds.id)
-			.limit(matches)
 	},
 
 	async versions(type: schema.ServerType) {

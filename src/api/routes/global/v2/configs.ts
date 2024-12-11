@@ -36,7 +36,7 @@ export = new globalAPIRouter.Path('/')
 				}
 			}
 		})
-		.onRequest(async(ctr) => {
+		.onRequest((ctr) => {
 			return ctr.print({
 				success: true,
 				configs

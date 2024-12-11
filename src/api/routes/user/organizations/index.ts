@@ -1,5 +1,4 @@
 import { userAPIRouter } from "@/api"
-import { object } from "@rjweb/utils"
 import { desc, eq, or } from "drizzle-orm"
 
 export = new userAPIRouter.Path('/')
