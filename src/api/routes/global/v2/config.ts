@@ -133,7 +133,7 @@ export = new globalAPIRouter.Path('/')
 
 				let contains: string | null = null
 
-				switch (format) {
+				if (data.data.file !== 'pufferfish.yml') switch (format) {
 					case "YAML": {
 						if (!contains) {
 							const configVersion = formatted.match(/config-version:\s*(.+)/)?.[1]
