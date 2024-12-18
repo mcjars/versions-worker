@@ -37,5 +37,21 @@ export default Object.assign(redis, {
 		}
 
 		return runResult
-	}
+	},
+
+	local: {
+		use<Run extends () => any>(key: string, run: Run, expire: number = time(3).s()): ReturnType<Run> {
+			const mapResult = localCache.get(`internal-middlewares::cache::${key}`)
+			if (mapResult) return mapResult
+
+			const runResult = run()
+			localCache.set(`internal-middlewares::cache::${key}`, runResult)
+
+			if (!!expire) setTimeout(() => {
+				localCache.delete(`internal-middlewares::cache::${key}`)
+			}, expire)
+
+			return runResult
+		}
+	} as const
 })

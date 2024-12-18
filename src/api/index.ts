@@ -261,61 +261,65 @@ function getPriority(path: string) {
 server.path('/', (path) => path
 	.http('GET', '/openapi.json', (http) => http
 		.onRequest((ctr) => {
-			const openAPI = server.openAPI('MCJars Versions API', ctr["@"].appVersion, {
-				url: env.APP_URL
-			}, {
-				email: 'me@rjns.dev',
-				name: 'GitHub',
-				url: 'https://github.com/mcjars'
-			})
+			const openAPI = ctr["@"].cache.local.use('openapi', () => {
+				const openAPI = server.openAPI('MCJars Versions API', ctr["@"].appVersion, {
+					url: env.APP_URL
+				}, {
+					email: 'me@rjns.dev',
+					name: 'GitHub',
+					url: 'https://github.com/mcjars'
+				})
 
-			openAPI.components = {
-				...openAPI.components,
-				securitySchemes: {
-					api_key: {
-						type: 'apiKey',
-						in: 'header',
-						name: 'Authorization',
-						scheme: 'token'
+				openAPI.components = {
+					...openAPI.components,
+					securitySchemes: {
+						api_key: {
+							type: 'apiKey',
+							in: 'header',
+							name: 'Authorization',
+							scheme: 'token'
+						}
 					}
 				}
-			}
 
-			const endpoints = Object.assign({}, openAPI.paths!)
+				const endpoints = Object.assign({}, openAPI.paths!)
 
-			for (const path in endpoints) {
-				if (!path.startsWith('/api')) continue
+				for (const path in endpoints) {
+					if (!path.startsWith('/api')) continue
 
-				const type = path.includes('/api/v1')
-					? '/api/v1'
-					: path.includes('/api/v2')
-						? '/api/v2'
-						: path.includes('/api/organization')
-							? '/api/organization'
-							: '/api/user'
+					const type = path.includes('/api/v1')
+						? '/api/v1'
+						: path.includes('/api/v2')
+							? '/api/v2'
+							: path.includes('/api/organization')
+								? '/api/organization'
+								: '/api/user'
 
-				for (const method in endpoints[path]) {
-					endpoints[path][method as 'delete']!.tags = [type]
+					for (const method in endpoints[path]) {
+						endpoints[path][method as 'delete']!.tags = [type]
+					}
 				}
-			}
 
-			const sortedPaths = Object.keys(endpoints).sort((a, b) => {			
-				const priorityA = getPriority(a)
-				const priorityB = getPriority(b)
+				const sortedPaths = Object.keys(endpoints).sort((a, b) => {			
+					const priorityA = getPriority(a)
+					const priorityB = getPriority(b)
 
-				if (priorityA !== priorityB) {
-					return priorityA - priorityB
-				}
+					if (priorityA !== priorityB) {
+						return priorityA - priorityB
+					}
+					
+					return a.localeCompare(b)
+				})
 				
-				return a.localeCompare(b)
-			})
-			
-			const sortedEndpoints: typeof endpoints = {}
-			for (const path of sortedPaths) {
-				sortedEndpoints[path] = endpoints[path]
-			}
+				const sortedEndpoints: typeof endpoints = {}
+				for (const path of sortedPaths) {
+					sortedEndpoints[path] = endpoints[path]
+				}
 
-			openAPI.paths = sortedEndpoints			
+				openAPI.paths = sortedEndpoints
+
+				return openAPI
+			})
 
 			return ctr.print(openAPI)
 		})
@@ -392,7 +396,6 @@ server.path('/', (path) => path
 
 server.http(async(ctr) => {
 	ctr["@"].data = {}
-
 	logger()
 		.text(`${ctr.type.toUpperCase()} ${ctr.url.method}`, (c) => c.green)
 		.text(':')
@@ -400,6 +403,16 @@ server.http(async(ctr) => {
 		.text(ctr.client.ip.usual(), (c) => c.cyan)
 		.text(ctr.context.ip.isProxied ? '(proxied)' : '(raw)', (c) => c.gray)
 		.info()
+})
+
+if (env.LOG_LEVEL === 'debug') server.finish('httpRequest', (ctr) => {
+	logger()
+		.text(`HTTP ${ctr.url.method}`, (c) => c.green)
+		.text(':')
+		.text(ctr.url.href, (c) => c.green)
+		.text(ctr.client.ip.usual(), (c) => c.cyan)
+		.text(`(${ctr.context.elapsed().toFixed(2)}ms)`, (c) => c.gray)
+		.debug()
 })
 
 server

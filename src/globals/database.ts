@@ -508,8 +508,7 @@ export default Object.assign(db as DbWithoutWrite, {
 		}
 
 		if (file === 'velocity.toml') {
-			value = value
-				.replace(/forwarding-secret = "(.*)"/, 'forwarding-secret="xxx"')
+			value = value.replace(/forwarding-secret = "(.*)"/, 'forwarding-secret="xxx"')
 		}
 
 		if (file === 'config.yml') {
@@ -519,8 +518,7 @@ export default Object.assign(db as DbWithoutWrite, {
 		}
 
 		if (file === 'leaves.yml') {
-			value = value
-				.replace(/server-id: (.*)/, 'server-id: xxx')
+			value = value.replace(/server-id: (.*)/, 'server-id: xxx')
 		}
 
 		value = value.trim()
@@ -598,8 +596,8 @@ export default Object.assign(db as DbWithoutWrite, {
 		return minecraft ? 'minecraft' : project ? 'project' : null
 	},
 
-	async types() {
-		const response = await cache.use('types::all', async() => {
+	types() {
+		return cache.use('types::all', async() => {
 			const data = await db.select({
 				type: schema.builds.type,
 				builds: count(),
@@ -622,7 +620,5 @@ export default Object.assign(db as DbWithoutWrite, {
 				}
 			]))
 		}, time(30).m())
-
-		return response
 	}
 })
