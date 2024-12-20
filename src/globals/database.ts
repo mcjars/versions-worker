@@ -153,7 +153,7 @@ const extraTypeInfos: Record<schema.ServerType, {
 		name: 'Mohist',
 		color: '#2A3294',
 		homepage: 'https://mohistmc.com/software/mohist',
-		deprecated: false,
+		deprecated: true,
 		experimental: false,
 		description: 'A variation of forge/neoforge that allows loading spigot plugins next to mods.',
 		categories: ['modded', 'plugins'],
