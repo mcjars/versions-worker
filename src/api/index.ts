@@ -387,6 +387,16 @@ server.path('/', (path) => path
 	<body>
 		<script id="api-reference" data-url="/openapi.json" data-configuration="${JSON.stringify({ defaultOpenAllTags: true, hideClientButton: true })}"></script>
 		<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+		<script>
+			const query = new URLSearchParams(window.location.search)
+
+			if (query.has('warn')) {
+				alert('IMPORTANT NOTICE:\\n\\nIf you want to use the api for automated tasks such as collecting data, please either contact me@rjns.dev or add ?tracking=none at the end of your urls. This is to prevent unnecessary tracking of automated tasks.')
+
+				query.delete('warn')
+				window.history.replaceState({}, document.title, \`\${window.location.pathname}\${query.toString() ? '?' : ''}\${query.toString()}\${window.location.hash}\`)
+			}
+		</script>
 	</body>
 </html>
 			`.trim())
