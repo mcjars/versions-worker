@@ -2,7 +2,7 @@ import { globalAPIRouter } from "@/api"
 import { object, time } from "@rjweb/utils"
 import { z } from "zod"
 import { ServerType, types } from "@/schema"
-import { sql } from "drizzle-orm"
+import { eq, sql } from "drizzle-orm"
 import cache from "@/globals/cache"
 import database, { ReturnRow } from "@/globals/database"
 
@@ -48,7 +48,7 @@ async function lookupBuild(data: z.infer<typeof buildSearch>) {
 					? sql.raw('build_hashes INNER JOIN builds ON builds.id = build_hashes.build_id')
 					: sql.identifier('builds')
 				} WHERE ${sql.raw(
-					Object.keys(data).filter((k) => k !== 'hash').map(toSnakeCase).map((key) => `builds.${toSnakeCase(key)} ${typeof data[key as keyof typeof data] === 'number'
+					Object.keys(data).filter((k) => k !== 'hash').map((key) => `builds.${toSnakeCase(key)} ${typeof data[key as keyof typeof data] === 'number'
 						? `= ${data[key as keyof typeof data]}`
 						: typeof data[key as keyof typeof data] === 'string'
 							? `= '${escapeString(data[key as keyof typeof data] as any)}'`
@@ -96,7 +96,19 @@ async function lookupBuild(data: z.infer<typeof buildSearch>) {
 		`)
 	}, time(30).m())
 
-	return [ build, latest ]
+	const configs = await cache.use(`configs::build::${build.id}`, () => database.select({
+			location: database.schema.configs.location,
+			type: database.schema.configs.type,
+			format: database.schema.configs.format,
+			value: database.schema.configValues.value
+		})
+			.from(database.schema.buildConfigs)
+			.innerJoin(database.schema.configs, eq(database.schema.buildConfigs.configId, database.schema.configs.id))
+			.innerJoin(database.schema.configValues, eq(database.schema.buildConfigs.configValueId, database.schema.configValues.id))
+			.where(eq(database.schema.buildConfigs.buildId, build.id))
+	)
+
+	return [ build, latest, configs ] as const
 }
 
 export = new globalAPIRouter.Path('/')
@@ -129,12 +141,32 @@ export = new globalAPIRouter.Path('/')
 												$ref: '#/components/schemas/build'
 											}, version: {
 												$ref: '#/components/schemas/minifiedVersion'
+											}, configs: {
+												type: 'object',
+												additionalProperties: {
+													type: 'object',
+													properties: {
+														type: {
+															$ref: '#/components/schemas/types'
+														}, format: {
+															type: 'string',
+															enum: database.schema.formats
+														}, value: {
+															type: 'string'
+														}
+													}, required: [
+														'type',
+														'format',
+														'value'
+													]
+												}
 											}
 										}, required: [
 											'success',
 											'build',
 											'latest',
-											'version'
+											'version',
+											'configs'
 										]
 									},
 									{
@@ -154,11 +186,31 @@ export = new globalAPIRouter.Path('/')
 															$ref: '#/components/schemas/build'
 														}, version: {
 															$ref: '#/components/schemas/minifiedVersion'
+														}, configs: {
+															type: 'object',
+															additionalProperties: {
+																type: 'object',
+																properties: {
+																	type: {
+																		$ref: '#/components/schemas/types'
+																	}, format: {
+																		type: 'string',
+																		enum: database.schema.formats
+																	}, value: {
+																		type: 'string'
+																	}
+																}, required: [
+																	'type',
+																	'format',
+																	'value'
+																]
+															}
 														}
 													}, required: [
 														'build',
 														'latest',
-														'version'
+														'version',
+														'configs'
 													]
 												}
 											}
@@ -188,13 +240,13 @@ export = new globalAPIRouter.Path('/')
 			if (!data.success) return ctr.status(ctr.$status.BAD_REQUEST).print({ success: false, errors: data.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`) })
 
 			if (Array.isArray(data.data)) {
-				const builds = await Promise.all(data.data.map((build) => lookupBuild(build)))
+				const builds = await Promise.all(data.data.map(lookupBuild))
 
 				return ctr.print({
 					success: true,
 					builds: builds.map((build) => !build[0] || !build[1] ? null : ({
-						build: fields.length > 0 ? object.pick(ctr["@"].database.prepare.rawBuild(build[0]), fields) : ctr["@"].database.prepare.rawBuild(build[0]),
-						latest: fields.length > 0 && build[1] ? object.pick(ctr["@"].database.prepare.rawBuild(build[1]), fields) : ctr["@"].database.prepare.rawBuild(build[1]),
+						build: fields.length > 0 ? object.pick(database.prepare.rawBuild(build[0]), fields) : database.prepare.rawBuild(build[0]),
+						latest: fields.length > 0 && build[1] ? object.pick(database.prepare.rawBuild(build[1]), fields) : database.prepare.rawBuild(build[1]),
 						version: {
 							id: build[1].version_id || build[1].project_version_id,
 							type: build[1].version_type ?? undefined,
@@ -202,18 +254,22 @@ export = new globalAPIRouter.Path('/')
 							supported: build[1].version_supported ? Boolean(build[1].version_supported) : undefined,
 							created: build[1].version_created ? new Date(build[1].version_created) : undefined,
 							builds: parseInt(build[1].build_count)
-						}
+						}, configs: Object.fromEntries(build[2].map((config) => [config.location, {
+							type: config.type,
+							format: config.format,
+							value: config.value
+						}]))
 					}))
 				})
 			}
 
-			const [ build, latest ] = await lookupBuild(data.data)
+			const [ build, latest, configs ] = await lookupBuild(data.data)
 			if (!build || !latest) return ctr.status(ctr.$status.NOT_FOUND).print({ success: false, errors: ['Build not found'] })
 
 			return ctr.print({
 				success: true,
-				build: fields.length > 0 ? object.pick(ctr["@"].database.prepare.rawBuild(build), fields) : ctr["@"].database.prepare.rawBuild(build),
-				latest: fields.length > 0 && latest ? object.pick(ctr["@"].database.prepare.rawBuild(latest), fields) : ctr["@"].database.prepare.rawBuild(latest),
+				build: fields.length > 0 ? object.pick(database.prepare.rawBuild(build), fields) : database.prepare.rawBuild(build),
+				latest: fields.length > 0 && latest ? object.pick(database.prepare.rawBuild(latest), fields) : database.prepare.rawBuild(latest),
 				version: {
 					id: latest.version_id || latest.project_version_id,
 					type: latest.version_type ?? undefined,
@@ -221,7 +277,11 @@ export = new globalAPIRouter.Path('/')
 					supported: latest.version_supported ?? undefined,
 					created: latest.version_created ? new Date(latest.version_created) : undefined,
 					builds: parseInt(latest.build_count)
-				}
+				}, configs: Object.fromEntries(configs.map((config) => [config.location, {
+					type: config.type,
+					format: config.format,
+					value: config.value
+				}]))
 			})
 		})
 	)

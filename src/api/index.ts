@@ -407,7 +407,7 @@ server.http(async(ctr) => {
 
 if (env.LOG_LEVEL === 'debug') server.finish('httpRequest', (ctr) => {
 	logger()
-		.text(`HTTP ${ctr.url.method}`, (c) => c.green)
+		.text(`${ctr.context.response.status} ${ctr.url.method}`, (c) => c.green)
 		.text(':')
 		.text(ctr.url.href, (c) => c.green)
 		.text(ctr.client.ip.usual(), (c) => c.cyan)
